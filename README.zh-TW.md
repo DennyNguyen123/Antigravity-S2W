@@ -17,6 +17,8 @@
 
 **Antigravity-S2W** 是一個 VS Code 擴充套件，可以批次分析已安裝於 Claude/Codex/Gemini(即將支援) 的 Skills 的檔案，將它們轉為簡單的 Global Workslow，讓妳在 Antigravity 對話中，能夠透過 `/` 指令去選取並呼叫想使用的技能，也支持手動選取 Skill ZIP 檔，或直接從 github 網址安裝 Skill。
 
+![Antigravity-S2W Screenshot](resources/screenshot.jpg)
+
 ## 功能特色
 
 ### 🔄 工作流程生成器

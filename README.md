@@ -17,6 +17,8 @@
 
 **Antigravity-S2W** is a VS Code extension that batch-analyzes installed Skill files. It converts them into simple Global Workflows, allowing you to select and invoke skills via the `/` command in Antigravity chat. It also supports manually selecting Skill ZIP files or installing Skills directly from GitHub URLs.
 
+![Antigravity-S2W Screenshot](resources/screenshot.jpg)
+
 ## Features
 
 ### 🔄 Workflow Generator
