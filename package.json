@@ -1,12 +1,14 @@
 {
   "name": "antigravity-skills-generator",
   "displayName": "Antigravity-S2W",
-  "description": "Agentic Skills Manager compatible with AgentOS",
+  "description": "Transform installed AI skills into executable Antigravity Workflows",
+  "publisher": "KerrYang56",
+  "icon": "resources/antigravity-icon.svg",
   "repository": {
     "type": "git",
     "url": "https://github.com/KerrYang56/Antigravity-S2W.git"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.90.0"
   },
