@@ -1,0 +1,15 @@
+.vscode/**
+.vscode-test/**
+out/**
+src/**/*.ts
+test/**
+.gitignore
+.yarnrc
+vsc-extension-quickstart.md
+**/*.map
+.github/**
+webpack.config.js
+tsconfig.json
+.gemini/**
+**/*.tsbuildinfo
+node_modules/**
