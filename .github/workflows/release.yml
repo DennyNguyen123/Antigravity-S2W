@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,10 +32,28 @@ jobs:
         # --no-dependencies because webpack bundles them
         run: npx @vscode/vsce package --no-dependencies
 
+      - name: Generate Changelog
+        run: |
+          # Try to get previous tag, suppress error if none (first release)
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          echo "Previous Tag: $PREV_TAG"
+
+          if [ -z "$PREV_TAG" ]; then
+            echo "Generating full changelog..."
+            git log --pretty=format:"* %s (%h)" > CHANGELOG.txt
+          else
+            echo "Generating changelog since $PREV_TAG..."
+            git log --pretty=format:"* %s (%h)" ${PREV_TAG}..HEAD > CHANGELOG.txt
+          fi
+
+          echo "Changelog Content:"
+          cat CHANGELOG.txt
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: "*.vsix"
+          body_path: CHANGELOG.txt
           generate_release_notes: true
           draft: false
           prerelease: false
