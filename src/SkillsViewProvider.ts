@@ -95,16 +95,26 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async downloadSkillFromGitHub(url: string) {
-    const regex = /github\.com\/([^\/]+)\/([^\/]+)\/tree\/([^\/]+)\/(.+)/;
-    const match = url.match(regex);
+    const regexFull = /github\.com\/([^\/]+)\/([^\/]+)\/tree\/([^\/]+)\/(.+)/;
+    const regexRoot = /github\.com\/([^\/]+)\/([^\/]+)\/?$/;
+    
+    let owner, repo, branch, folderPath;
 
-    if (!match) {
-        // Fallback for root of repo? For now just enforce full folder path structure
-        throw new Error("Invalid URL. Must be like: https://github.com/owner/repo/tree/branch/path");
+    const matchFull = url.match(regexFull);
+    if (matchFull) {
+        [, owner, repo, branch, folderPath] = matchFull;
+    } else {
+        const matchRoot = url.match(regexRoot);
+        if (matchRoot) {
+             [, owner, repo] = matchRoot;
+             branch = 'HEAD'; // Use default branch via HEAD ref
+             folderPath = ''; // Root
+        } else {
+             throw new Error("Invalid URL. Supported formats:\n1. https://github.com/owner/repo\n2. https://github.com/owner/repo/tree/branch/path");
+        }
     }
 
-    const [, owner, repo, branch, folderPath] = match;
-    const skillName = path.basename(folderPath); 
+    const skillName = folderPath ? path.basename(folderPath) : repo; 
     
     // Prepare Destination
     const skillsDir = this.pathManager.getSkillsPath();

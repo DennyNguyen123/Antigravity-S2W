@@ -180,7 +180,8 @@
 
     const confirmDownloadBtn = document.getElementById('confirm-download-btn');
     if (confirmDownloadBtn) {
-        confirmDownloadBtn.addEventListener('click', () => {
+    if (confirmDownloadBtn) {
+        const triggerDownload = () => {
             const urlInput = /** @type {HTMLInputElement | null} */ (document.getElementById('url-input'));
             const url = urlInput ? urlInput.value.trim() : '';
             
@@ -188,7 +189,19 @@
                 setLoading(true, 'install');
                 vscode.postMessage({ command: 'downloadUrl', url: url });
             }
-        });
+        };
+
+        confirmDownloadBtn.addEventListener('click', triggerDownload);
+
+        const urlInput = document.getElementById('url-input');
+        if (urlInput) {
+            urlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    triggerDownload();
+                }
+            });
+        }
+    }
     }
 
     // 4. Refresh & List Logic
