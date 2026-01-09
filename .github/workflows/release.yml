@@ -34,15 +34,25 @@ jobs:
 
       - name: Generate Changelog
         run: |
-          # Try to get previous tag, suppress error if none (first release)
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          # Fetch all tags to ensure we have the list
+          git fetch --tags --force
+
+          # Get tags sorted by creation date (newest first)
+          # We expect the current release tag to be at the top or near it
+          ALL_TAGS=$(git tag --sort=-creatordate)
+          params=($ALL_TAGS)
+
+          CURRENT_TAG=${params[0]}
+          PREV_TAG=${params[1]} # The one before current
+
+          echo "Current Tag: $CURRENT_TAG"
           echo "Previous Tag: $PREV_TAG"
 
           if [ -z "$PREV_TAG" ]; then
-            echo "Generating full changelog..."
+            echo "No previous tag found. Generating full changelog..."
             git log --pretty=format:"* %s (%h)" > CHANGELOG.txt
           else
-            echo "Generating changelog since $PREV_TAG..."
+            echo "Generating changelog from $PREV_TAG to HEAD..."
             git log --pretty=format:"* %s (%h)" ${PREV_TAG}..HEAD > CHANGELOG.txt
           fi
 
