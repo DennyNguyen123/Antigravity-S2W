@@ -125,12 +125,12 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     }
     fs.mkdirSync(destDir, { recursive: true });
 
-    vscode.window.showInformationMessage(`Downloading '${skillName}' from GitHub...`);
+    // vscode.window.showInformationMessage(`Downloading '${skillName}' from GitHub...`);
 
     // Recursive Download
     await this.recursiveDownload(owner, repo, branch, folderPath, destDir);
     
-    vscode.window.showInformationMessage(`Download complete: ${skillName}`);
+    // vscode.window.showInformationMessage(`Download complete: ${skillName}`);
 
     // Generate & Refresh
     const workflowsDir = this.pathManager.getDestinationPath();
@@ -478,7 +478,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
         fs.rmSync(skillFolderPath, { recursive: true, force: true });
       }
 
-      vscode.window.showInformationMessage(`Workflow '${skillName}' and source files deleted.`);
+      // vscode.window.showInformationMessage(`Workflow '${skillName}' and source files deleted.`);
       this.sendWorkflowList(); // Refresh UI
     } catch (e: any) {
       console.error(e);

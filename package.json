@@ -3,7 +3,7 @@
   "displayName": "Antigravity-S2W",
   "description": "Transform installed AI skills into executable Antigravity Workflows",
   "publisher": "KerrYang56",
-  "icon": "resources/antigravity-icon.svg",
+  "icon": "resources/antigravity-icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/KerrYang56/Antigravity-S2W.git"

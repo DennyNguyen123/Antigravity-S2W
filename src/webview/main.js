@@ -169,9 +169,16 @@
              // Toggle Input Container
              const container = document.getElementById('url-input-container');
              if (container) {
-                 if (container.style.display === 'none') {
+                 const isHidden = container.classList.contains('hidden') || container.style.display === 'none';
+                 
+                 if (isHidden) {
+                     container.classList.remove('hidden');
                      container.style.display = 'block';
+                     // Auto-focus the input
+                     const input = document.getElementById('url-input');
+                     if (input) input.focus();
                  } else {
+                     container.classList.add('hidden');
                      container.style.display = 'none';
                  }
              }
