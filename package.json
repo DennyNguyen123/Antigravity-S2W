@@ -2,6 +2,10 @@
   "name": "antigravity-skills-generator",
   "displayName": "Antigravity-S2W",
   "description": "Agentic Skills Manager compatible with AgentOS",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KerrYang56/Antigravity-S2W.git"
+  },
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.90.0"
