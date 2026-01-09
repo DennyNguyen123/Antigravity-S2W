@@ -42,6 +42,8 @@
 
 
     // --- Message Handling ---
+    /** @type {any} */
+    let loadingInterval = null;
     window.addEventListener('message', event => {
         const message = event.data;
         
@@ -140,7 +142,7 @@
             const selectedValue = sourceSelect.value;
             // Ignore if it's the placeholder prompt
             if (selectedValue && selectedValue !== '__SELECT_CUSTOM__') {
-                setLoading(true, 'gen');
+                setLoading(true, 'gen', 'Generating Workflows');
                 // Value IS the path now (except for custom prompt)
                 vscode.postMessage({ 
                     command: 'generate', 
@@ -151,13 +153,13 @@
     }
 
     // 3. Install Logic (Button Mode)
-    // 3. Install Logic (Button Mode)
     // installBtn is already defined at top scope
     if (installBtn) {
         installBtn.addEventListener('click', () => {
              // Fallback to file picker if users click instead of drag
              // But we can't trigger native file picker from Webview easily without backend help.
              // Let's send a command to backend to open dialog.
+             setLoading(true, 'install', 'Waiting for selection');
              vscode.postMessage({ command: 'openFilePicker' });
         });
     } else {
@@ -193,7 +195,7 @@
             const url = urlInput ? urlInput.value.trim() : '';
             
             if (url) {
-                setLoading(true, 'install');
+                setLoading(true, 'install', 'Downloading and Importing');
                 vscode.postMessage({ command: 'downloadUrl', url: url });
             }
         };
@@ -430,16 +432,30 @@
      * @param {boolean} isLoading
      * @param {'gen'|'install'} target
      */
-    function setLoading(isLoading, target = 'gen') {
+    /**
+     * @param {boolean} isLoading
+     * @param {'gen'|'install'} target
+     * @param {string|null} [customMessage]
+     */
+    function setLoading(isLoading, target = 'gen', customMessage = null) {
         if (target === 'gen' && generateBtn) {
-            generateBtn.disabled = isLoading;
-            showStatus(isLoading ? 'Processing...' : '', 'info', 'gen');
+            /** @type {HTMLButtonElement} */(generateBtn).disabled = isLoading;
+            const msg = customMessage || 'Processing';
+            if (isLoading) startLoadingAnimation(target, msg);
+            else showStatus('', 'info', target);
         }
         if (target === 'install' && installBtn) {
             /** @type {HTMLButtonElement} */(installBtn).disabled = isLoading;
-            showStatus(isLoading ? 'Waiting for selection...' : '', 'info', 'install');
+            const msg = customMessage || 'Processing'; // specific default messages can be set in caller
+            if (isLoading) startLoadingAnimation(target, msg);
+            else showStatus('', 'info', target);
         }
     }
+
+    /** @type {any} */
+    let timeoutGen = null;
+    /** @type {any} */
+    let timeoutInstall = null;
 
     /**
      * @param {string} text
@@ -450,6 +466,25 @@
         const el = target === 'install' ? statusTextInstall : statusTextGen;
         if (!el) return;
 
+        // Clear any running animation
+        if (loadingInterval) {
+            clearInterval(loadingInterval);
+            loadingInterval = null;
+        }
+
+        // Clear existing timeout for this target
+        if (target === 'install') {
+            if (timeoutInstall) {
+                clearTimeout(timeoutInstall);
+                timeoutInstall = null;
+            }
+        } else {
+            if (timeoutGen) {
+                clearTimeout(timeoutGen);
+                timeoutGen = null;
+            }
+        }
+
         el.textContent = text;
         el.className = 'status-text ' + (type || 'info'); // Reset classes
         
@@ -457,8 +492,40 @@
             el.classList.add('hidden');
         } else {
             el.classList.remove('hidden');
-            // Persistent: We DO NOT remove the text after a timeout.
+            
+            // Auto-hide after 15 seconds ONLY for results (success/error)
+            if (type === 'success' || type === 'error') {
+                const timer = setTimeout(() => {
+                    el.classList.add('hidden');
+                    // Optional: clear text? 
+                    // el.textContent = ''; 
+                }, 15000);
+
+                if (target === 'install') timeoutInstall = timer;
+                else timeoutGen = timer;
+            }
         }
+    }
+
+    /**
+     * @param {'gen'|'install'} target
+     * @param {string} baseText
+     */
+    function startLoadingAnimation(target, baseText) {
+        // First show the base state
+        showStatus(baseText, 'info', target);
+        
+        // Prevent multiple intervals
+        if (loadingInterval) clearInterval(loadingInterval);
+
+        const el = target === 'install' ? statusTextInstall : statusTextGen;
+        if (!el) return;
+
+        let dots = 0;
+        loadingInterval = setInterval(() => {
+            dots = (dots + 1) % 4; // 0, 1, 2, 3
+            el.textContent = baseText + '.'.repeat(dots);
+        }, 500);
     }
 
     /**

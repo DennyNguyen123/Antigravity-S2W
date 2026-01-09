@@ -566,6 +566,16 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async processZip(zip: JSZip, zipName: string) {
+    // PRE-VALIDATION: Check if SKILL.md exists in the ZIP archive *before* extracting
+    const filePaths = Object.keys(zip.files);
+    const hasSkillDef = filePaths.some(p => 
+        p.match(/(^|[\/\\])(SKILL\.md)$/i)
+    );
+    
+    if (!hasSkillDef) {
+        throw new Error("Invalid Skill Package: Missing 'SKILL.md'.");
+    }
+
     // Updated: Install to the standard skill directory so PathManager can see it.
     const targetBaseDir = path.join(
       os.homedir(),
