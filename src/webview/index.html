@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Antigravity S2W</title>
+    <link href="style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header Section -->
+      <header class="header">
+        <div class="logo-area">
+          <h2>SKILLS <span>TO WORKFLOW</span></h2>
+        </div>
+        <a
+          href="https://skillsmp.com/"
+          class="marketplace-link"
+          target="_blank"
+        >
+          Visit Skills Marketplace ↗
+        </a>
+      </header>
+
+      <!-- Generator Section -->
+      <section class="card generator-card">
+        <h3>Workflow Generator</h3>
+        <div class="form-group">
+          <label for="skill-source">Select Skill Source</label>
+          <select id="skill-source">
+            <option value="" disabled selected>Loading sources...</option>
+          </select>
+        </div>
+        <button id="generate-btn" class="btn btn-primary" disabled>
+          <span class="icon">⚡</span> Generate Workflows
+        </button>
+        <div id="generation-status" class="status-text hidden"></div>
+      </section>
+
+      <!-- Installer Section -->
+      <section class="card installer-card">
+        <h3>Import Skill Files to Workflow</h3>
+        <button id="install-btn" class="btn btn-primary">
+          <span class="icon">📦</span> Select ZIP Files...
+        </button>
+        <div style="height: 8px;"></div>
+        <button id="download-url-btn" class="btn btn-secondary">
+          <span class="icon">🌐</span> Download from URL...
+        </button>
+
+        <!-- URL Input Container -->
+        <div id="url-input-container" class="url-input-group hidden" style="display: none;">
+            <input type="text" id="url-input" placeholder="https://github.com/owner/repo/tree/branch/path">
+            <button id="confirm-download-btn" class="btn btn-primary">Download</button>
+        </div>
+
+        <div id="install-status" class="status-text hidden"></div>
+      </section>
+
+      <!-- Manager Section -->
+      <section class="workflow-list-section">
+        <div class="section-header">
+          <h3>Workflows Manager</h3>
+          <button id="refresh-btn" class="btn-icon-ghost" title="Refresh">↻</button>
+        </div>
+        <ul id="workflow-list" class="workflow-list">
+          <!-- Items will be injected here via JS -->
+          <li class="empty-state">No workflows found.</li>
+        </ul>
+      </section>
+    </div>
+
+    <script src="main.js"></script>
+  </body>
+</html>
