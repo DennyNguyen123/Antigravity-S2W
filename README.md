@@ -103,6 +103,8 @@ npm run compile
 
 ### Import Skills from ZIP
 
+> Tip: You can download skill packages from [Skills Marketplace](https://skillsmp.com).
+
 1. Click **Select ZIP Files...**
 2. Choose one or more `.zip` files containing skill folders
 3. The extension will:

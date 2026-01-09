@@ -103,6 +103,8 @@ npm run compile
 
 ### 從 ZIP 匯入技能
 
+> 提示：您可以從 [Skills Marketplace](https://skillsmp.com) 下載技能包。
+
 1. 點擊 **Select ZIP Files...**
 2. 選擇一個或多個包含技能資料夾的 `.zip` 檔案
 3. 擴充套件將會：
