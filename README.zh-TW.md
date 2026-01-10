@@ -9,8 +9,6 @@
 > [!NOTE]
 > **Gemini CLI** 預覽版現已原生支援 Skills 功能！前往 [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) 了解更多。
 >
-> 本專案為 [Antigravity IDE](https://antigravity.dev) 使用者提供**臨時替代方案**。透過產生工作流程檔案，讓 Antigravity 能夠定位並根據 `SKILL.md` 定義執行技能。產生後，使用者可在對話介面中使用 **`/`（斜線命令）** 呼叫想使用的技能。
-
 ---
 
 ## 概述
@@ -172,8 +170,8 @@ description: [從 SKILL.md 擷取]
 
 ## 系統需求
 
-- VS Code 1.90.0 或更高版本
-- Node.js（開發用）
+- Google Antigravity IDE
+- Node.js (for development)
 
 ## 授權條款
 

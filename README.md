@@ -9,7 +9,6 @@
 > [!NOTE]
 > **Gemini CLI** preview now natively supports Skills! Learn more at [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli).
 >
-> This project provides a alternative way for [Antigravity IDE](https://antigravity.dev) users. It generates workflow files that direct Antigravity to locate and execute skills from `SKILL.md` definitions. Once generated, users can invoke skills using the **`/` (slash command)** in the chat interface.
 
 ---
 
@@ -172,7 +171,7 @@ Please read and internalize the skill documentation located at:
 
 ## Requirements
 
-- VS Code 1.90.0 or higher
+- Google Antigravity IDE
 - Node.js (for development)
 
 ## License
