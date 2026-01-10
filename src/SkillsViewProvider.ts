@@ -645,6 +645,29 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
+  private _getWarningHtml(): string {
+    const appName = vscode.env.appName || 'Unknown';
+    if (appName.toLowerCase().includes('antigravity')) {
+      return '';
+    }
+    
+    return `
+    <div style="
+      background-color: #ffe6e6; 
+      color: #900; 
+      padding: 8px; 
+      text-align: left; 
+      font-size: 0.85em;
+      font-weight: 500; 
+      border-bottom: 2px solid #d00;
+      font-family: sans-serif;
+    ">
+      This extension is designed for <strong>Google Antigravity IDE</strong>.<br>
+      It may not function correctly here.<br>
+      We recommend uninstalling it.
+    </div>`;
+  }
+
   private _getHtmlForWebview(webview: vscode.Webview) {
     // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
     const scriptUri = webview.asWebviewUri(
@@ -666,6 +689,17 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     // Inject URIs
     htmlContent = htmlContent.replace("style.css", styleUri.toString());
     htmlContent = htmlContent.replace("main.js", scriptUri.toString());
+
+    // Inject Compatibility Warning
+    const warningHtml = this._getWarningHtml();
+    if (warningHtml) {
+      if (htmlContent.includes("<body>")) {
+          htmlContent = htmlContent.replace("<body>", `<body>${warningHtml}`);
+      } else {
+          // Fallback if body tag is missing or has attributes
+          htmlContent = warningHtml + htmlContent; 
+      }
+    }
 
     return htmlContent;
   }
