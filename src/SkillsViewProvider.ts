@@ -577,12 +577,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     }
 
     // Updated: Install to the standard skill directory so PathManager can see it.
-    const targetBaseDir = path.join(
-      os.homedir(),
-      ".gemini",
-      "antigravity",
-      "skills"
-    );
+    const targetBaseDir = this.pathManager.getSkillsPath();
     const extractTarget = path.join(targetBaseDir, zipName);
 
     if (!fs.existsSync(extractTarget))

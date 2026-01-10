@@ -7,7 +7,7 @@ export class WorkflowGenerator {
 
     /**
      * Generates AgentOS-compatible workflows from a given skill source directory.
-     * @param sourcePath The absolute path to the skills folder (e.g. ~/.gemini/antigravity/skills)
+     * @param sourcePath The absolute path to the skills folder (e.g. ~/.gemini/skills)
      * @param outputDir The absolute path to the .agent/workflows directory
      */
     public async generate(sourcePath: string, outputDir: string): Promise<{ success: number; failed: number }> {
