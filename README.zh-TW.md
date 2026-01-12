@@ -3,7 +3,8 @@
 [English](README.md)
 
 > [!NOTE]
-> **Gemini CLI** 預覽版現已原生支援 Skills！前往 [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) 了解更多。
+> - **Gemini CLI** 預覽版現已原生支援 Skills！前往 [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) 了解更多。
+> - **一鍵安裝 Superpowers** 為實驗性功能，正等待官方合併：[feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192)。
 
 ![Antigravity-S2W Screenshot](resources/screenshot.jpg)
 

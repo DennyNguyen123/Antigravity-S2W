@@ -3,7 +3,8 @@
 [繁體中文](README.zh-TW.md)
 
 > [!NOTE]
-> **Gemini CLI** preview now natively supports Skills! Learn more at [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli).
+> - **Gemini CLI** preview now natively supports Skills! Learn more at [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli).
+> - **OneKey Install Superpowers** is an experimental feature pending upstream merge: [feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192).
 
 ![Antigravity-S2W Screenshot](resources/screenshot.jpg)
 
