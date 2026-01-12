@@ -3,42 +3,49 @@
 [繁體中文](README.zh-TW.md)
 
 > [!NOTE]
+> **Updated on 2026-01-12**
+>
 > - **Gemini CLI** preview now natively supports Skills! Learn more at [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli).
-> - **OneKey Install Superpowers** is an experimental feature pending upstream merge: [feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192).
+> - **OneKey Install Superpowers** is an experimental feature pending upstream merge: [feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192). The bootstrap command will fail, but this extension automatically converts Superpowers skills to Global Workflows, making them available via `/` commands.
 
 ![Antigravity-S2W Screenshot](resources/screenshot.jpg)
+
+## Requirements
+
+> [!IMPORTANT]
+> This extension requires **Google Antigravity IDE** to function.
 
 ## Features
 
 Transform your installed AI Skills into Antigravity Global Workflow files. Collect skills from different AI tools and use them in Antigravity with a simple `/` command.
 
-### 🔄 Workflow Generator
+### 1. Workflow Generator
 
 - Scan skill directories from multiple providers (Claude / Codex / Gemini)
 - Read metadata from `SKILL.md` (name + `description` frontmatter)
 - Generate standardized Global Workflow `.md` files
 
-### 📦 Skill Importer
+### 2. Skill Importer
 
 - **ZIP import**: Extract skill packages from one or more ZIP files
 - **GitHub download**: Install skills directly from a GitHub folder URL
 - Supports [Skills Marketplace](https://skillsmp.com) packages
 
-### 🚀 Skills Source Toggles
+### 3. Skills Source Toggles
 
 - **Superpowers**: One-click install/uninstall [obra/superpowers](https://github.com/obra/superpowers)
 - **Anthropic Skills**: One-click install/uninstall [anthropics/skills](https://github.com/anthropics/skills)
 - Automatic workflow generation from installed skills
 - Update button to pull latest changes
 
-### 📋 Workflow Manager
+### 4. Workflow Manager
 
 - Browse all generated workflows in one place
 - Enable/disable workflows by renaming `.md` ⇄ `.md.disable`
 - Open and edit workflow files directly
 - Delete workflows and their corresponding source skill folders
 
-### ⚙️ Auto-Configuration
+### 5. Auto-Configuration
 
 - Automatically adds "Available Skills" section to `~/.gemini/GEMINI.md` on first activation
 - AI agents will discover skills from trusted directories
@@ -46,11 +53,11 @@ Transform your installed AI Skills into Antigravity Global Workflow files. Colle
 
 ## Installation
 
-### From Open VSX (Recommended)
+### 1. From Open VSX (Recommended)
 
 Install directly from [Open VSX Registry](https://open-vsx.org/extension/kerryang56/antigravity-skill-to-workflow)
 
-### From VSIX (Manual)
+### 2. From VSIX (Manual)
 
 1. Download `.vsix` from [Releases](../../releases)
 2. In Antigravity: `Ctrl+Shift+P` → `Extensions: Install from VSIX...`
@@ -89,10 +96,6 @@ description: A brief description of what this skill does
 
 Detailed documentation and instructions...
 ```
-
-## Requirements
-
-- Google Antigravity IDE
 
 ## Feedback & Contributions
 

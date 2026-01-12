@@ -3,42 +3,49 @@
 [English](README.md)
 
 > [!NOTE]
+> **更新於 2026-01-12**
+>
 > - **Gemini CLI** 預覽版現已原生支援 Skills！前往 [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) 了解更多。
-> - **一鍵安裝 Superpowers** 為實驗性功能，正等待官方合併：[feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192)。
+> - **一鍵安裝 Superpowers** 為實驗性功能，正等待官方合併：[feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192)。Bootstrap 指令會失敗，但本擴充套件會自動將 Superpowers 技能轉換為 Global Workflows，可透過 `/` 指令使用。
 
 ![Antigravity-S2W Screenshot](resources/screenshot.jpg)
+
+## 系統需求
+
+> [!IMPORTANT]
+> 本擴充套件需要 **Google Antigravity IDE** 才能運作。
 
 ## 功能特色
 
 將您安裝的 AI Skills 轉換為 Antigravity Global Workflow 檔案。整合來自不同 AI 工具的技能，在 Antigravity 中用 `/` 指令快速使用。
 
-### 🔄 工作流程生成器
+### 1. 工作流程生成器
 
 - 掃描多個供應商的技能目錄（Claude / Codex / Gemini）
 - 從 `SKILL.md` 讀取中繼資料（名稱 + `description` frontmatter）
 - 生成標準化的 Global Workflow `.md` 檔案
 
-### 📦 技能匯入器
+### 2. 技能匯入器
 
 - **ZIP 匯入**：從一個或多個 ZIP 檔案解壓縮技能套件
 - **GitHub 下載**：直接從 GitHub 資料夾 URL 下載安裝
 - 支援 [Skills Marketplace](https://skillsmp.com) 技能包
 
-### 🚀 技能來源開關
+### 3. 技能來源開關
 
 - **Superpowers**：一鍵安裝/移除 [obra/superpowers](https://github.com/obra/superpowers)
 - **Anthropic Skills**：一鍵安裝/移除 [anthropics/skills](https://github.com/anthropics/skills)
 - 安裝後自動產生對應的工作流程
 - 附帶更新按鈕以拉取最新變更
 
-### 📋 工作流程管理器
+### 4. 工作流程管理器
 
 - 在同一介面瀏覽所有已生成的工作流程
 - 啟用/停用工作流程（`.md` ⇄ `.md.disable`）
 - 直接開啟並編輯工作流程檔案
 - 刪除工作流程及其對應的來源技能資料夾
 
-### ⚙️ 自動設定
+### 5. 自動設定
 
 - 首次啟動自動在 `~/.gemini/GEMINI.md` 加入「Available Skills」區塊
 - AI 代理會自動從信任目錄發現可用技能
@@ -46,11 +53,11 @@
 
 ## 安裝方式
 
-### 從 Open VSX 安裝（推薦）
+### 1. 從 Open VSX 安裝（推薦）
 
 直接從 [Open VSX Registry](https://open-vsx.org/extension/kerryang56/antigravity-skill-to-workflow) 安裝
 
-### 從 VSIX 安裝（手動）
+### 2. 從 VSIX 安裝（手動）
 
 1. 從 [Releases](../../releases) 下載 `.vsix` 檔案
 2. 在 Antigravity 中：`Ctrl+Shift+P` → `Extensions: Install from VSIX...`
@@ -89,10 +96,6 @@ description: 此技能功能的簡短描述
 
 詳細的文件說明與使用指南...
 ```
-
-## 系統需求
-
-- Google Antigravity IDE
 
 ## 意見回饋與貢獻
 
