@@ -1,7 +1,12 @@
 import * as vscode from 'vscode';
 import { SkillsViewProvider } from './SkillsViewProvider';
+import { GlobalRulesManager } from './services/GlobalRulesManager';
 
 export function activate(context: vscode.ExtensionContext) {
+
+	// Ensure global rules are set up (only runs once)
+	const globalRulesManager = new GlobalRulesManager();
+	globalRulesManager.ensureSkillsSection();
 
 	const provider = new SkillsViewProvider(context.extensionUri);
 

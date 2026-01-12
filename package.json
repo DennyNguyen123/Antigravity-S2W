@@ -17,6 +17,16 @@
     "AI",
     "Other"
   ],
+  "keywords": [
+    "antigravity",
+    "google antigravity",
+    "skills",
+    "workflow",
+    "ai",
+    "claude",
+    "gemini",
+    "superpowers"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "viewsContainers": {

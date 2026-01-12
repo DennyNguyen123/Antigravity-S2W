@@ -3,6 +3,8 @@ import * as path from "path";
 import * as fs from "fs";
 import { PathManager } from "./services/PathManager";
 import { WorkflowGenerator } from "./services/WorkflowGenerator";
+import { SuperpowersInstaller } from "./services/SuperpowersInstaller";
+import { AnthropicSkillsInstaller } from "./services/AnthropicSkillsInstaller";
 // Note: Installer logic can be simple enough to be inline or imported if we had a separate file.
 import * as JSZip from "jszip";
 import * as os from "os";
@@ -13,10 +15,14 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   private pathManager: PathManager;
   private workflowGenerator: WorkflowGenerator;
+  private superpowersInstaller: SuperpowersInstaller;
+  private anthropicInstaller: AnthropicSkillsInstaller;
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this.pathManager = new PathManager();
     this.workflowGenerator = new WorkflowGenerator();
+    this.superpowersInstaller = new SuperpowersInstaller();
+    this.anthropicInstaller = new AnthropicSkillsInstaller();
   }
 
   public resolveWebviewView(
@@ -83,6 +89,39 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
                    this._view?.webview.postMessage({ command: "status", type: "error", text: `Error: ${e.message}` });
                }
            }
+           break;
+        case "installSuperpowers":
+           await this.handleInstallSuperpowers();
+           break;
+        case "uninstallSuperpowers":
+           await this.handleUninstallSuperpowers();
+           break;
+        case "toggleSuperpowers":
+           if (data.enabled) {
+             await this.handleInstallSuperpowers();
+           } else {
+             await this.handleUninstallSuperpowers();
+           }
+           break;
+        case "checkSuperpowers":
+           this.sendSuperpowersStatus();
+           break;
+        case "updateSuperpowers":
+           await this.handleUpdateSuperpowers();
+           break;
+        // Anthropic Skills handlers
+        case "toggleAnthropic":
+           if (data.enabled) {
+             await this.handleInstallAnthropic();
+           } else {
+             await this.handleUninstallAnthropic();
+           }
+           break;
+        case "checkAnthropic":
+           this.sendAnthropicStatus();
+           break;
+        case "updateAnthropic":
+           await this.handleUpdateAnthropic();
            break;
       }
     });
@@ -499,6 +538,14 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     if (uris && uris.length > 0) {
       const paths = uris.map((u) => u.fsPath);
       await this.handleInstall(paths);
+    } else {
+      // User cancelled
+      this._view?.webview.postMessage({
+        command: "status",
+        type: "info",
+        text: "Selection cancelled",
+        target: "install"
+      });
     }
   }
 
@@ -633,6 +680,260 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
 
     // Just refresh the view
     this.sendWorkflowList();
+  }
+
+  // --- Superpowers Installation ---
+
+  /**
+   * 處理 Superpowers 安裝請求
+   */
+  private async handleInstallSuperpowers() {
+    try {
+      // 發送安裝進度
+      this._view?.webview.postMessage({
+        command: "superpowersProgress",
+        text: "Installing Superpowers..."
+      });
+
+      await this.superpowersInstaller.install((step) => {
+        this._view?.webview.postMessage({
+          command: "superpowersProgress",
+          text: step
+        });
+      });
+
+      // 安裝成功
+      this._view?.webview.postMessage({
+        command: "superpowersStatus",
+        installed: true,
+        text: "Superpowers installed successfully!"
+      });
+
+      // 刷新 Workflow 列表（因為新增了 workflow commands）
+      this.sendWorkflowList();
+
+      vscode.window.showInformationMessage(
+        "Superpowers installed! Reload Antigravity IDE to activate."
+      );
+    } catch (e: any) {
+      this._view?.webview.postMessage({
+        command: "superpowersStatus",
+        installed: false,
+        text: `Installation failed: ${e.message}`
+      });
+      vscode.window.showErrorMessage(`Superpowers installation failed: ${e.message}`);
+    }
+  }
+
+  /**
+   * 發送 Superpowers 安裝狀態給前端
+   */
+  private sendSuperpowersStatus() {
+    if (this._view) {
+      const installed = this.superpowersInstaller.isInstalled();
+      this._view.webview.postMessage({
+        command: "superpowersStatus",
+        installed: installed,
+        path: this.superpowersInstaller.getInstallPath()
+      });
+    }
+  }
+
+  /**
+   * 處理 Superpowers 移除請求
+   */
+  private async handleUninstallSuperpowers() {
+    try {
+      // 發送移除進度
+      this._view?.webview.postMessage({
+        command: "superpowersProgress",
+        text: "Uninstalling Superpowers..."
+      });
+
+      await this.superpowersInstaller.uninstall((step) => {
+        this._view?.webview.postMessage({
+          command: "superpowersProgress",
+          text: step
+        });
+      });
+
+      // 移除成功
+      this._view?.webview.postMessage({
+        command: "superpowersStatus",
+        installed: false,
+        text: "Superpowers removed successfully!"
+      });
+
+      // 刷新 Workflow 列表
+      this.sendWorkflowList();
+
+      vscode.window.showInformationMessage(
+        "Superpowers removed successfully!"
+      );
+    } catch (e: any) {
+      this._view?.webview.postMessage({
+        command: "superpowersStatus",
+        installed: true,
+        text: `Uninstallation failed: ${e.message}`
+      });
+      vscode.window.showErrorMessage(`Superpowers removal failed: ${e.message}`);
+    }
+  }
+
+  /**
+   * 處理 Superpowers 更新請求
+   */
+  private async handleUpdateSuperpowers() {
+    try {
+      this._view?.webview.postMessage({
+        command: "superpowersProgress",
+        text: "Updating Superpowers..."
+      });
+
+      await this.superpowersInstaller.update((step) => {
+        this._view?.webview.postMessage({
+          command: "superpowersProgress",
+          text: step
+        });
+      });
+
+      this._view?.webview.postMessage({
+        command: "superpowersStatus",
+        installed: true,
+        text: "Superpowers updated successfully!"
+      });
+
+      this.sendWorkflowList();
+      vscode.window.showInformationMessage("Superpowers updated successfully!");
+    } catch (e: any) {
+      this._view?.webview.postMessage({
+        command: "superpowersStatus",
+        installed: true,
+        text: `Update failed: ${e.message}`
+      });
+      vscode.window.showErrorMessage(`Superpowers update failed: ${e.message}`);
+    }
+  }
+
+  // --- Anthropic Skills ---
+
+  /**
+   * 處理 Anthropic Skills 安裝請求
+   */
+  private async handleInstallAnthropic() {
+    try {
+      this._view?.webview.postMessage({
+        command: "anthropicProgress",
+        text: "Installing Anthropic Skills..."
+      });
+
+      await this.anthropicInstaller.install((step) => {
+        this._view?.webview.postMessage({
+          command: "anthropicProgress",
+          text: step
+        });
+      });
+
+      this._view?.webview.postMessage({
+        command: "anthropicStatus",
+        installed: true,
+        text: "Anthropic Skills installed successfully!"
+      });
+
+      this.sendWorkflowList();
+      vscode.window.showInformationMessage("Anthropic Skills installed!");
+    } catch (e: any) {
+      this._view?.webview.postMessage({
+        command: "anthropicStatus",
+        installed: false,
+        text: `Installation failed: ${e.message}`
+      });
+      vscode.window.showErrorMessage(`Anthropic Skills installation failed: ${e.message}`);
+    }
+  }
+
+  /**
+   * 處理 Anthropic Skills 移除請求
+   */
+  private async handleUninstallAnthropic() {
+    try {
+      this._view?.webview.postMessage({
+        command: "anthropicProgress",
+        text: "Uninstalling Anthropic Skills..."
+      });
+
+      await this.anthropicInstaller.uninstall((step) => {
+        this._view?.webview.postMessage({
+          command: "anthropicProgress",
+          text: step
+        });
+      });
+
+      this._view?.webview.postMessage({
+        command: "anthropicStatus",
+        installed: false,
+        text: "Anthropic Skills removed successfully!"
+      });
+
+      this.sendWorkflowList();
+      vscode.window.showInformationMessage("Anthropic Skills removed!");
+    } catch (e: any) {
+      this._view?.webview.postMessage({
+        command: "anthropicStatus",
+        installed: true,
+        text: `Uninstallation failed: ${e.message}`
+      });
+      vscode.window.showErrorMessage(`Anthropic Skills removal failed: ${e.message}`);
+    }
+  }
+
+  /**
+   * 處理 Anthropic Skills 更新請求
+   */
+  private async handleUpdateAnthropic() {
+    try {
+      this._view?.webview.postMessage({
+        command: "anthropicProgress",
+        text: "Updating Anthropic Skills..."
+      });
+
+      await this.anthropicInstaller.update((step) => {
+        this._view?.webview.postMessage({
+          command: "anthropicProgress",
+          text: step
+        });
+      });
+
+      this._view?.webview.postMessage({
+        command: "anthropicStatus",
+        installed: true,
+        text: "Anthropic Skills updated successfully!"
+      });
+
+      this.sendWorkflowList();
+      vscode.window.showInformationMessage("Anthropic Skills updated!");
+    } catch (e: any) {
+      this._view?.webview.postMessage({
+        command: "anthropicStatus",
+        installed: true,
+        text: `Update failed: ${e.message}`
+      });
+      vscode.window.showErrorMessage(`Anthropic Skills update failed: ${e.message}`);
+    }
+  }
+
+  /**
+   * 發送 Anthropic Skills 安裝狀態給前端
+   */
+  private sendAnthropicStatus() {
+    if (this._view) {
+      const installed = this.anthropicInstaller.isInstalled();
+      this._view.webview.postMessage({
+        command: "anthropicStatus",
+        installed: installed,
+        path: this.anthropicInstaller.getInstallPath()
+      });
+    }
   }
 
   private sendStatus(successCount: number, total: number) {

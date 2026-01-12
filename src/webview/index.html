@@ -43,25 +43,79 @@
         <button id="install-btn" class="btn btn-primary">
           <span class="icon">📦</span> Select ZIP Files...
         </button>
-        <div style="height: 8px;"></div>
+        <div style="height: 8px"></div>
         <button id="download-url-btn" class="btn btn-secondary">
           <span class="icon">🌐</span> Import from Github URL...
         </button>
 
         <!-- URL Input Container -->
-        <div id="url-input-container" class="url-input-group hidden" style="display: none;">
-            <input type="text" id="url-input" placeholder="https://github.com/owner/repo/tree/branch/path">
-            <button id="confirm-download-btn" class="btn btn-primary">Download and Import</button>
+        <div
+          id="url-input-container"
+          class="url-input-group hidden"
+          style="display: none"
+        >
+          <input
+            type="text"
+            id="url-input"
+            placeholder="https://github.com/owner/repo/tree/branch/path"
+          />
+          <button id="confirm-download-btn" class="btn btn-primary">
+            Download and Import
+          </button>
         </div>
 
         <div id="install-status" class="status-text hidden"></div>
       </section>
 
+      <!-- Skills Source Section (Table Layout) -->
+      <section class="workflow-list-section">
+        <div class="section-header">
+          <h3>ONEKEY INSTALL SKILLS</h3>
+        </div>
+        <ul class="workflow-list skills-table">
+          <li class="workflow-header">
+            <div class="col-name">NAME</div>
+            <div class="col-desc">DESCRIPTION</div>
+            <div class="col-action">ACTION</div>
+          </li>
+          
+          <!-- Superpowers Row -->
+          <li class="workflow-row superpowers-row">
+            <div class="col-name">Superpowers</div>
+            <div class="col-desc">Advanced custom skills & tools</div>
+            <div class="col-action">
+              <button id="superpowers-update-btn" class="btn-icon-ghost" title="Update Superpowers">↻</button>
+              <label class="toggle-switch">
+                <input type="checkbox" id="superpowers-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </li>
+
+          <!-- Anthropic Skills Row -->
+          <li class="workflow-row anthropic-row">
+            <div class="col-name">Anthropic Skills</div>
+            <div class="col-desc">Pre-built AI capabilities & prompts</div>
+            <div class="col-action">
+              <button id="anthropic-update-btn" class="btn-icon-ghost" title="Update Anthropic Skills">↻</button>
+              <label class="toggle-switch">
+                <input type="checkbox" id="anthropic-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </li>
+        </ul>
+        <div id="superpowers-status" class="status-text hidden"></div>
+        <div id="anthropic-status" class="status-text hidden"></div>
+      </section>
+
       <!-- Manager Section -->
       <section class="workflow-list-section">
         <div class="section-header">
-          <h3>Workflows Manager</h3>
-          <button id="refresh-btn" class="btn-icon-ghost" title="Refresh">↻</button>
+          <h3>WORKFLOWS MANAGER</h3>
+          <button id="refresh-btn" class="btn-icon-ghost" title="Refresh/Update">
+            ↻
+          </button>
         </div>
         <ul id="workflow-list" class="workflow-list">
           <!-- Items will be injected here via JS -->

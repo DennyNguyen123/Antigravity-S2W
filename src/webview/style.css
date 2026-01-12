@@ -30,7 +30,7 @@
   --color-danger: #ef4444;
 
   /* === Layout & Spacing === */
-  --radius-sm: 4px;
+  --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
 
@@ -136,28 +136,25 @@ body {
    Cards - Elevated Containers with Accent
    ========================================================= */
 .card {
-  /* Elevated Background - slightly lighter/darker than base */
-  background: color-mix(in srgb, var(--bg-secondary), var(--text-primary) 3%);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-subtle);
-  border-left: 3px solid transparent;
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-fast);
 }
 
 .card:hover {
-  border-color: var(--border-strong);
-  border-left-color: var(--accent-primary);
-  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .card h3 {
-  margin: 0 0 var(--space-sm) 0;
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
+  margin: 0 0 var(--space-md) 0;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--accent-primary);
 }
 
@@ -334,9 +331,11 @@ select {
 
 .section-header h3 {
   margin: 0;
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-bold);
-  color: var(--text-primary);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent-primary); /* Changed back to blue per user request */
 }
 
 .btn-icon-ghost {
@@ -378,7 +377,8 @@ select {
 .workflow-header,
 .workflow-row {
   display: grid;
-  grid-template-columns: minmax(100px, 1fr) 2fr 72px;
+  /* Use CSS variable for the first column width, default to 150px or minmax logic */
+  grid-template-columns: var(--name-col-width, 140px) 1fr 100px;
   align-items: center;
   background: transparent;
 }
@@ -520,4 +520,168 @@ select {
   .col-desc {
     display: none;
   }
+}
+
+/* =========================================================
+   Skills Sources - Matching Mockup Design
+   ========================================================= */
+/* Skills Sources Table Specifics */
+.skills-table .col-action {
+  justify-content: flex-end; /* Align actions to right */
+  gap: var(--space-md);
+  padding-right: var(--space-lg);
+}
+
+/* Compact Toggles for Skills Table */
+.skills-table .toggle-switch {
+  width: 32px;
+  height: 18px;
+}
+
+.skills-table .toggle-slider {
+  border-radius: 18px;
+}
+
+.skills-table .toggle-slider:before {
+  width: 14px;
+  height: 14px;
+  left: 2px;
+  bottom: 2px;
+}
+
+.skills-table .toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(14px);
+}
+
+
+/* Remove old list styles */
+
+
+/* Old Skill Row Content Styles - Removed */
+
+
+
+
+/* Row Accent Colors - Superpowers */
+.superpowers-row .col-name {
+  color: #a78bfa !important;
+  font-weight: 600;
+}
+
+.superpowers-row .btn-icon-ghost {
+  display: flex !important;
+  color: #a78bfa !important;
+  background: transparent;
+  border: 1px solid #a78bfa;
+  border-radius: 6px;
+  width: 28px !important; /* Force width */
+  height: 28px !important; /* Force height */
+  flex-shrink: 0 !important; /* Prevent squishing */
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Row Accent Colors - Anthropic */
+.anthropic-row .col-name {
+  color: #fb923c !important;
+  font-weight: 600;
+}
+
+.anthropic-row .btn-icon-ghost {
+  display: flex !important;
+  color: #fb923c !important;
+  background: transparent;
+  border: 1px solid #fb923c;
+  border-radius: 6px;
+  width: 28px !important; /* Force width */
+  height: 28px !important; /* Force height */
+  flex-shrink: 0 !important; /* Prevent squishing */
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  align-items: center;
+  justify-content: center;
+}
+
+.anthropic-row .btn-icon-ghost:hover {
+  background: rgba(251, 146, 60, 0.15);
+  box-shadow: 0 0 8px rgba(251, 146, 60, 0.3);
+}
+
+.anthropic-row .toggle-switch input:checked + .toggle-slider {
+  background-color: #fb923c !important;
+  opacity: 1;
+}
+
+/* Toggle Switch Base Styles (Global) */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px; /* Default size */
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #4a4a50; /* Default OFF color */
+  transition: 0.3s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+/* Column Resizer */
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  background: transparent;
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.resizer:hover,
+.resizer.resizing {
+  background: var(--accent-primary);
+  opacity: 0.8;
+}
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-switch input:disabled + .toggle-slider {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-switch input:focus + .toggle-slider {
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
 }
