@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/KerrYang56/Antigravity-S2W.git"
   },
-  "version": "0.0.0",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.90.0"
   },
@@ -65,7 +65,8 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "release": "standard-version"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
@@ -80,6 +81,7 @@
     "eslint": "^8.41.0",
     "glob": "^8.1.0",
     "mocha": "^10.2.0",
+    "standard-version": "^9.5.0",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.4",
     "typescript": "^5.1.3",

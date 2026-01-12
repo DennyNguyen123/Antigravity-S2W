@@ -15,12 +15,11 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/).
   * New configuration options.
 * **PATCH**: Backward-compatible bug fixes.
 
-**Release Workflow**:
-
-1. **Update Version**: Manually update `version` in `package.json`.
-2. **Update Changelog**: Document changes in `CHANGELOG.md`.
-3. **Commit**: Commit changes (e.g., `chore: bump version to 0.1.0`).
-4. **Tag**: Create and push a git tag (e.g., `v0.1.0`) to trigger the CI release pipeline.
+**Release Workflow (Automated)**:
+1.  **Run Release**: Execute `npm run release` in the terminal.
+    *   This will automatically bump `package.json`, update `CHANGELOG.md`, and create a git tag.
+2.  **Push**: Push commits and tags: `git push --follow-tags`.
+3.  **CI/CD**: The pushed tag will trigger `release.yml` to publish the extension.
 
 ## 2. Commit Message Convention
 
@@ -53,10 +52,6 @@ Follow the **Conventional Commits** specification.
 ## 3. Workflow Summary
 
 1. Make changes locally.
-45: 1. Make changes locally.
-46: 2. Ensure `package.json` version is updated (if applicable).
 2. Commit using the naming convention (e.g., `git commit -m "feat: description"`).
-3. Push to `main`.
-4. **To Release**:
-    * Create a tag: `git tag v0.0.x`
-    * Push the tag: `git push origin v0.0.x`
+3. Run `npm run release` to bump version and tag.
+4. Push to `main`: `git push --follow-tags`.
