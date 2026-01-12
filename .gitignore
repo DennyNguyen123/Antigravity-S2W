@@ -32,3 +32,5 @@ Thumbs.db
 
 # Gemini / Antigravity Agent
 .agent/
+!.agent/GIT_WORKFLOW.md
+
