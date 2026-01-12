@@ -16,10 +16,11 @@ This project follows [Semantic Versioning 2.0.0](https://semver.org/).
 * **PATCH**: Backward-compatible bug fixes.
 
 **Release Workflow (Automated)**:
-1.  **Run Release**: Execute `npm run release` in the terminal.
-    *   This will automatically bump `package.json`, update `CHANGELOG.md`, and create a git tag.
-2.  **Push**: Push commits and tags: `git push --follow-tags`.
-3.  **CI/CD**: The pushed tag will trigger `release.yml` to publish the extension.
+
+1. **Run Release**: Execute `npm run release` in the terminal.
+    * This will automatically bump `package.json`, update `CHANGELOG.md`, and create a git tag.
+2. **Push**: Push commits and tags: `git push --follow-tags`.
+3. **CI/CD**: The pushed tag will trigger `release.yml` to publish the extension.
 
 ## 2. Commit Message Convention
 
