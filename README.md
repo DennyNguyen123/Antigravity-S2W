@@ -21,7 +21,7 @@ Transform your installed AI Skills into Antigravity Global Workflow files. Colle
 
 ### 1. Workflow Generator
 
-- Scan skill directories from multiple providers (Claude / Codex / Gemini)
+- Scan skill directories from Gemini
 - Read metadata from `SKILL.md` (name + `description` frontmatter)
 - Generate standardized Global Workflow `.md` files
 
@@ -50,7 +50,7 @@ Transform your installed AI Skills into Antigravity Global Workflow files. Colle
 - Automatically adds "Available Skills" section to `~/.gemini/GEMINI.md` on first activation
 - AI agents will discover skills from trusted directories
 - **Version-tracked updates**: When extension updates with new rules, old section is automatically replaced
-- Version marker: `<!-- S2W_RULE_VERSION:1.0.0 -->`
+- Version marker: `<!-- S2W_RULE_VERSION:1.1.0 -->`
 
 > [!IMPORTANT]
 > **About Manual Modifications**
@@ -92,7 +92,7 @@ Install directly from [Open VSX Registry](https://open-vsx.org/extension/kerryan
 
 | Type | Path |
 | ------ | ------ |
-| Skill Sources | `~/.gemini/skills/`, `~/.claude/skills/`, `~/.codex/skills/` |
+| Skill Sources | `~/.gemini/skills/`, `~/.antigravity/anthropic-skills/skills/`, `~/.antigravity/superpowers/skills/` |
 | Generated Workflows | `~/.gemini/antigravity/global_workflows/` |
 | Global Rules | `~/.gemini/GEMINI.md` |
 | Superpowers | `~/.antigravity/superpowers/` |

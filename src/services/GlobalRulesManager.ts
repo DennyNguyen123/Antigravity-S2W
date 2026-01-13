@@ -13,7 +13,7 @@ export class GlobalRulesManager {
   // Markers for identification
   private static readonly SKILLS_SECTION_MARKER = "## Available Skills";
   private static readonly RULE_VERSION_MARKER = "<!-- S2W_RULE_VERSION:";
-  private static readonly CURRENT_RULE_VERSION = "1.0.0";
+  private static readonly CURRENT_RULE_VERSION = "1.1.0";
 
   constructor() {
     this.homeDir = os.homedir();
@@ -121,9 +121,8 @@ The following directories are scanned for available skills (in priority order):
 |----------|------|---------|
 | 1 | \`~/.gemini/skills/\` | Gemini native skills |
 | 2 | \`~/.gemini/antigravity/skills/\` | Antigravity managed skills |
-| 3 | \`~/.claude/skills/\` | Claude native skills |
-| 4 | \`~/.codex/skills/\` | Codex skills |
-| 5 | \`~/.antigravity/superpowers/skills/\` | Superpowers skills |
+| 3 | \`~/.antigravity/anthropic-skills/skills/\` | Anthropic official skills |
+| 4 | \`~/.antigravity/superpowers/skills/\` | Superpowers skills |
 
 ### 2. **Skill Discovery Process**
 

@@ -4,6 +4,16 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [0.2.3]
+
+### Changed
+
+- **Global Rules (GEMINI.md)**: Updated trusted skill directories (v1.0.0 → v1.1.0)
+  - Removed `~/.claude/skills/` and `~/.codex/skills/`
+  - Added `~/.antigravity/anthropic-skills/skills/` (Anthropic official skills)
+  - Retained `~/.antigravity/superpowers/skills/` (Superpowers skills)
+- **Documentation**: Updated README files to reflect new skill directory structure
+
 ## [0.2.2]
 
 ### Added

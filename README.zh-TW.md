@@ -21,7 +21,7 @@
 
 ### 1. 工作流程生成器
 
-- 掃描多個供應商的技能目錄（Claude / Codex / Gemini）
+- 掃描 Gemini 的技能目錄
 - 從 `SKILL.md` 讀取中繼資料（名稱 + `description` frontmatter）
 - 生成標準化的 Global Workflow `.md` 檔案
 
@@ -50,7 +50,7 @@
 - 首次啟動自動在 `~/.gemini/GEMINI.md` 加入「Available Skills」區塊
 - AI 代理會自動從信任目錄發現可用技能
 - **版本追蹤更新**：當延伸模組更新規則時，會自動替換舊版本區塊
-- 版本標記：`<!-- S2W_RULE_VERSION:1.0.0 -->`
+- 版本標記：`<!-- S2W_RULE_VERSION:1.1.0 -->`
 
 > [!IMPORTANT]
 > **關於手動修改的重要提醒**
@@ -92,7 +92,7 @@
 
 | 類型 | 路徑 |
 | ------ | ------ |
-| 技能來源 | `~/.gemini/skills/`、`~/.claude/skills/`、`~/.codex/skills/` |
+| 技能來源 | `~/.gemini/skills/`、`~/.antigravity/anthropic-skills/skills/`、`~/.antigravity/superpowers/skills/` |
 | 產生的工作流程 | `~/.gemini/antigravity/global_workflows/` |
 | 全域規則 | `~/.gemini/GEMINI.md` |
 | Superpowers | `~/.antigravity/superpowers/` |
