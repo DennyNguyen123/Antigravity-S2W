@@ -11,11 +11,13 @@
 3. **Consistency**: Aligns with industry best practices
 4. **Open Source**: Makes the project accessible to global developers
 
+---
+
 ## Comment Style Guidelines
 
 ### 1. File-Level Comments
 
-Use JSDoc-style comments at the top of files to describe the module's purpose:
+Use JSDoc-style comments at the top of files:
 
 ```typescript
 /**
@@ -24,18 +26,9 @@ Use JSDoc-style comments at the top of files to describe the module's purpose:
  */
 ```
 
-**Example:**
-
-```typescript
-/**
- * GlobalRulesManager
- * Manages global rules configuration in ~/.gemini/GEMINI.md
- */
-```
-
 ### 2. Class/Function Comments
 
-Use JSDoc format for classes and functions:
+Use JSDoc format with proper annotations:
 
 ```typescript
 /**
@@ -45,40 +38,25 @@ Use JSDoc format for classes and functions:
  */
 ```
 
-**Example:**
-
-```typescript
-/**
- * Ensure Available Skills section exists in GEMINI.md
- * Appends on first install, automatically replaces old section on version update
- */
-public ensureSkillsSection(): void {
-  // ...
-}
-```
-
 ### 3. Inline Comments
 
-Use concise English comments for complex logic:
+Use concise English for complex logic:
 
 ```typescript
 // Check if Available Skills section already exists
 if (existingContent.includes(SKILLS_SECTION_MARKER)) {
   // Check version number
   const versionMatch = existingContent.match(/<!-- S2W_RULE_VERSION:(\S+) -->/);
-  //...
 }
 ```
 
 **Guidelines:**
 
-- Keep inline comments brief and focused
+- Keep brief and focused
 - Explain **WHY**, not just **WHAT**
 - Use proper capitalization and punctuation
 
 ### 4. TODO/FIXME/NOTE Comments
-
-Use standard markers for action items:
 
 ```typescript
 // TODO: Implement error retry logic
@@ -86,7 +64,9 @@ Use standard markers for action items:
 // NOTE: This behavior changed in v2.0
 ```
 
-## Comment Translation Examples
+---
+
+## Translation Examples
 
 ### ❌ Bad (Chinese)
 
@@ -96,13 +76,7 @@ Use standard markers for action items:
  */
 private async handleInstallSuperpowers() {
   // 發送安裝進度
-  this._view?.webview.postMessage({
-    command: "superpowersProgress",
-    text: "Installing Superpowers..."
-  });
-
-  // 安裝成功
-  //...
+  this._view?.webview.postMessage({...});
 }
 ```
 
@@ -114,20 +88,16 @@ private async handleInstallSuperpowers() {
  */
 private async handleInstallSuperpowers() {
   // Send installation progress
-  this._view?.webview.postMessage({
-    command: "superpowersProgress",
-    text: "Installing Superpowers..."
-  });
-
-  // Installation successful
-  //...
+  this._view?.webview.postMessage({...});
 }
 ```
+
+---
 
 ## Common Translation Patterns
 
 | Chinese | English |
-|---------|---------|
+| --------- | --------- |
 | 處理...請求 | Handle ... request |
 | 發送...給前端 | Send ... to frontend |
 | 檢查是否... | Check if ... / Check whether ... |
@@ -138,11 +108,10 @@ private async handleInstallSuperpowers() {
 | 執行... | Execute ... / Perform ... |
 | 讀取... | Read ... / Load ... |
 | 寫入... | Write ... / Save ... |
-| 如果...則... | If ..., then ... |
 | 成功 | Success / Successful |
 | 失敗 | Failure / Failed |
 | 已安裝 | Installed |
-| 已存在 | Already exists / Exists |
+| 已存在 | Already exists |
 | 刷新 | Refresh |
 | 複製 | Copy |
 | 產生 | Generate |
@@ -152,37 +121,96 @@ private async handleInstallSuperpowers() {
 | 路徑 | Path |
 | 版本 | Version |
 | 內容 | Content |
-| 設定 | Configuration / Settings |
-| 進度 | Progress |
 
-## Enforcement
+---
 
-1. **Code Review**: All PRs must have English comments
-2. **AI Assistant**: When generating code, always use English comments
-3. **Refactoring**: Gradually migrate existing Chinese comments to English
-4. **New Code**: All new code MUST use English comments from the start
+## Documentation Best Practices
 
-## Exceptions
+### Updating CHANGELOG.md
 
-None. All comments must be in English without exception.
+When migrating code comments, **always update CHANGELOG.md** with details:
+
+**Include:**
+
+1. File-specific details with comment count
+2. Translation examples (before/after)
+3. Impact summary
+
+**Format:**
+
+```markdown
+## [X.Y.Z] - YYYY-MM-DD
+
+### Changed
+
+- **Code Internationalization**: Summary (total count)
+  - **FileName.ts**: N comments translated
+    - Category of changes
+```
+
+**Example:**
+
+```markdown
+## [0.2.1] - 2026-01-13
+
+### Changed
+
+- **Code Internationalization**: 79 comments translated
+  - **SuperpowersInstaller.ts**: 39 comments
+  - **AnthropicSkillsInstaller.ts**: 11 comments
+```
+
+---
 
 ## Tools & Automation
 
-### Checking Chinese Characters in Comments
+### Checking Chinese Characters
 
-Use this regex pattern to find Chinese characters in code comments:
+Use this regex to find Chinese characters in comments:
 
 ```regex
 [\u4e00-\u9fff]
 ```
 
-### VS Code Search
+**VS Code Search:**
 
-1. Open Search (Ctrl+Shift+F)
+1. Open Search (`Ctrl+Shift+F`)
 2. Enable regex mode
-3. Search pattern: `[\u4e00-\u9fff]`
+3. Pattern: `[\u4e00-\u9fff]`
 4. Include: `**/*.ts`, `**/*.js`
 
 ---
 
-**Remember**: Writing comments in English is not just about translation—it's about making the code accessible to a global audience and ensuring long-term maintainability.
+## Enforcement
+
+1. **Code Review**: All PRs must have English comments
+2. **AI Assistant**: Always use English when generating code
+3. **New Code**: All new code MUST use English from the start
+
+## Exceptions
+
+None. All comments must be in English.
+
+---
+
+## Migration Checklist
+
+- [x] `GlobalRulesManager.ts` - ✅ Completed (15 comments)
+- [x] `SuperpowersInstaller.ts` - ✅ Completed (39 comments)
+- [x] `AnthropicSkillsInstaller.ts` - ✅ Completed (11 comments)
+- [x] `SkillsViewProvider.ts` - ✅ Completed (14 comments)
+- [x] `PathManager.ts` - ✅ No Chinese comments found
+- [x] `WorkflowGenerator.ts` - ✅ No Chinese comments found
+- [x] All source files - ✅ Fully migrated
+
+**Status**: 🎉 **100% Complete** - All code comments are now in English!
+
+---
+
+## Last Updated
+
+2026-01-13 (All comments migrated to English)
+
+---
+
+**Remember**: Writing comments in English is about making the code accessible to a global audience and ensuring long-term maintainability.

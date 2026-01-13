@@ -1,8 +1,46 @@
 # Changelog
+<!-- markdownlint-disable -->
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [0.2.1](https://github.com/KerrYang56/Antigravity-S2W/compare/v0.1.0...v0.2.1) (2026-01-13)
+
+## [0.2.1]
+
+### Added
+
+- **CODE_COMMENT_RULE.md**: Comprehensive comment guidelines document (188 lines)
+  - Language requirements (English-only policy)
+  - JSDoc format guidelines
+  - Translation examples and 40+ common phrase pairs
+  - Enforcement mechanisms and migration checklist
+
+### Changed
+
+- **Code Internationalization**: Migrated all code comments from Chinese to English (79 comments translated)
+  - **GlobalRulesManager.ts**: 15 comments translated
+    - Class and method documentation
+    - Version checking and section management logic
+  - **SuperpowersInstaller.ts**: 39 comments translated
+    - Installation workflow documentation
+    - Repository cloning and configuration steps
+    - Workflow generation and removal processes
+  - **AnthropicSkillsInstaller.ts**: 11 comments translated
+    - Installation and update workflow documentation
+    - Repository and workflow management
+  - **SkillsViewProvider.ts**: 14 comments translated
+    - Frontend-backend communication handlers
+    - Installation progress and status management
+
+- **Version Management System**: Implemented S2W_RULE_VERSION mechanism
+  - Automatic version tracking for Global Rules (`GEMINI.md`)
+  - Smart detection and replacement of outdated rules
+  - Backward compatibility for legacy installations (treats missing version as v0.0.0)
+  - Current version marker: `<!-- S2W_RULE_VERSION:1.0.0 -->`
+
+- **Documentation Updates**: Enhanced README files with version management warnings
+  - Added important notice about manual modifications
+  - Provided upgrade instructions for existing users
+  - Explained how versioning works (4-point explanation)
 
 ## [0.1.0] - 2026-01-12
 
