@@ -5,6 +5,9 @@
 /* --- Theme-Aware Custom Properties --- */
 :root {
   /* === Semantic Colors (Light/Dark Adaptive via VS Code tokens) === */
+  --skills-col-width: 140px;
+  --skills-desc-width: 1fr;
+  --workflows-col-width: 140px;
   --bg-primary: var(--vscode-editor-background);
   --bg-secondary: var(
     --vscode-sideBar-background,
@@ -377,10 +380,23 @@ select {
 .workflow-header,
 .workflow-row {
   display: grid;
-  /* Use CSS variable for the first column width, default to 150px or minmax logic */
-  grid-template-columns: var(--name-col-width, 140px) 1fr 100px;
   align-items: center;
   background: transparent;
+}
+
+/* Skills Table specific override */
+.skills-table .workflow-header,
+.skills-table .workflow-row {
+  grid-template-columns: var(--skills-col-width, 140px) var(
+      --skills-desc-width,
+      1fr
+    ) 100px;
+}
+
+/* Workflow List specific override */
+.workflow-list .workflow-header,
+.workflow-list .workflow-row {
+  grid-template-columns: var(--workflows-col-width, 140px) 1fr 100px;
 }
 
 .workflow-header {
@@ -429,12 +445,20 @@ select {
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
   border-right: 1px solid var(--border-subtle);
+  /* Text Wrapping Enabled */
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible; /* Ensure resizer is visible */
 }
 
 .col-desc {
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   border-right: 1px solid var(--border-subtle);
+  white-space: normal; /* Allow wrapping */
+  word-break: break-word; /* handle long paths */
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-sm);
 }
 
 .col-action {
@@ -553,14 +577,9 @@ select {
   transform: translateX(14px);
 }
 
-
 /* Remove old list styles */
 
-
 /* Old Skill Row Content Styles - Removed */
-
-
-
 
 /* Row Accent Colors - Superpowers */
 .superpowers-row .col-name {
@@ -582,6 +601,11 @@ select {
   transition: all 0.2s ease;
   align-items: center;
   justify-content: center;
+}
+
+.superpowers-row .toggle-switch input:checked + .toggle-slider {
+  background-color: #a78bfa !important;
+  opacity: 1;
 }
 
 /* Row Accent Colors - Anthropic */
@@ -634,7 +658,10 @@ select {
 .toggle-slider {
   position: absolute;
   cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-color: #4a4a50; /* Default OFF color */
   transition: 0.3s;
   border-radius: 24px;
@@ -644,26 +671,7 @@ select {
   position: absolute;
   content: "";
   height: 18px;
-/* Column Resizer */
-.resizer {
-  position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  cursor: col-resize;
-  user-select: none;
-  touch-action: none;
-  background: transparent;
-  z-index: 10;
-  transition: background 0.2s;
-}
 
-.resizer:hover,
-.resizer.resizing {
-  background: var(--accent-primary);
-  opacity: 0.8;
-}
   width: 18px;
   left: 3px;
   bottom: 3px;
@@ -684,4 +692,36 @@ select {
 
 .toggle-switch input:focus + .toggle-slider {
   box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+}
+
+/* =========================================================
+   Column Resizing Fixes
+   ========================================================= */
+
+/* Allow header to overflow so resizer can sit on the border */
+.workflow-header .col-name,
+.workflow-header .col-desc {
+  overflow: visible !important;
+  position: relative;
+}
+
+/* Enlarged Resizer centered on the border */
+.resizer {
+  position: absolute;
+  right: -5px; /* Center on the 1px border */
+  top: 0;
+  bottom: 0;
+  width: 10px; /* Large hit area */
+  cursor: col-resize;
+  user-select: none;
+  touch-action: none;
+  background: rgba(128, 128, 128, 0); /* Invisible by default */
+  z-index: 1000; /* Ensure on top */
+  transition: background 0.2s;
+}
+
+.resizer:hover,
+.resizer.resizing {
+  background: var(--accent-primary); /* Visible on hover */
+  opacity: 1;
 }

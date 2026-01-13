@@ -37,13 +37,9 @@ export class SuperpowersInstaller {
    * Check if Superpowers is already installed
    */
   public isInstalled(): boolean {
-    // Check if marker file exists
-    const markerFile = path.join(
-      this.superpowersDir,
-      ".antigravity",
-      "superpowers-antigravity"
-    );
-    return fs.existsSync(markerFile);
+    // Check if skills directory exists
+    const skillsDir = path.join(this.superpowersDir, "skills");
+    return fs.existsSync(skillsDir);
   }
 
   /**
@@ -221,7 +217,7 @@ You have superpowers. Superpowers teach you new skills and capabilities.
    */
   private async generateWorkflowsFromSkills(): Promise<void> {
     const skillsDir = this.getSkillsPath();
-    
+
     // Skip if skills directory doesn't exist
     if (!fs.existsSync(skillsDir)) {
       return;
@@ -266,22 +262,26 @@ You have superpowers. Superpowers teach you new skills and capabilities.
    */
   private async removeGeneratedWorkflows(): Promise<void> {
     const skillsDir = this.getSkillsPath();
-    
+
     if (!fs.existsSync(skillsDir) || !fs.existsSync(this.globalWorkflowsDir)) {
       return;
     }
 
     // List all skill names
-    const skillDirs = fs.readdirSync(skillsDir, { withFileTypes: true })
-      .filter(d => d.isDirectory())
-      .map(d => d.name);
+    const skillDirs = fs
+      .readdirSync(skillsDir, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name);
 
     // Remove corresponding workflow files
     for (const skillName of skillDirs) {
       const fileName = `superpowers_${skillName}.md`;
       const workflowFile = path.join(this.globalWorkflowsDir, fileName);
-      const workflowFileDisabled = path.join(this.globalWorkflowsDir, `${fileName}.disable`);
-      
+      const workflowFileDisabled = path.join(
+        this.globalWorkflowsDir,
+        `${fileName}.disable`
+      );
+
       if (fs.existsSync(workflowFile)) {
         fs.rmSync(workflowFile, { force: true });
       }
@@ -295,21 +295,32 @@ You have superpowers. Superpowers teach you new skills and capabilities.
    * Remove copied command files
    */
   private removeWorkflowCommands(): void {
-    const commandsDir = path.join(this.superpowersDir, ".antigravity", "commands");
-    
-    if (!fs.existsSync(commandsDir) || !fs.existsSync(this.globalWorkflowsDir)) {
+    const commandsDir = path.join(
+      this.superpowersDir,
+      ".antigravity",
+      "commands"
+    );
+
+    if (
+      !fs.existsSync(commandsDir) ||
+      !fs.existsSync(this.globalWorkflowsDir)
+    ) {
       return;
     }
 
     // List all command files
-    const commandFiles = fs.readdirSync(commandsDir)
-      .filter(f => f.endsWith(".md"));
+    const commandFiles = fs
+      .readdirSync(commandsDir)
+      .filter((f) => f.endsWith(".md"));
 
     // Remove corresponding files
     for (const file of commandFiles) {
       const targetFile = path.join(this.globalWorkflowsDir, file);
-      const targetFileDisabled = path.join(this.globalWorkflowsDir, `${file}.disable`);
-      
+      const targetFileDisabled = path.join(
+        this.globalWorkflowsDir,
+        `${file}.disable`
+      );
+
       if (fs.existsSync(targetFile)) {
         fs.rmSync(targetFile, { force: true });
       }
@@ -328,7 +339,7 @@ You have superpowers. Superpowers teach you new skills and capabilities.
     }
 
     let content = fs.readFileSync(this.geminiMdPath, "utf8");
-    
+
     // Remove Superpowers System block
     // Match from ## Superpowers System to </EXTREMELY_IMPORTANT>
     const regex = /\n*## Superpowers System[\s\S]*?<\/EXTREMELY_IMPORTANT>\s*/g;

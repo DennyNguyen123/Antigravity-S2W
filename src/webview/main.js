@@ -93,12 +93,12 @@
         // Backend sends generic 'status', usually checks active operation
         // We'll default to generator unless we know better, or add a 'target' field to backend messages later.
         // For now, if the message text contains "Install" or "Zip", show in installer.
-        const target = message.target || (
-          message.text.toLowerCase().includes("install") ||
+        const target =
+          message.target ||
+          (message.text.toLowerCase().includes("install") ||
           message.text.toLowerCase().includes("zip")
             ? "install"
-            : "gen"
-        );
+            : "gen");
 
         // Show the status message
         showStatus(message.text, message.type, target);
@@ -478,7 +478,7 @@
       colNameHeader.textContent = "Name";
 
       // Use shared resizer attachment
-      attachResizer(colNameHeader);
+      attachResizer(colNameHeader, '--workflows-col-width');
 
       header.appendChild(colNameHeader);
 
@@ -672,11 +672,12 @@
 
   // --- Column Resizing Logic ---
 
-  /**
+    /**
    * Attaches a resize handler to a column header
    * @param {HTMLElement} colNameHeader
+   * @param {string} [widthVar] CSS variable to update
    */
-  function attachResizer(colNameHeader) {
+  function attachResizer(colNameHeader, widthVar = '--name-col-width') {
     // Prevent duplicate resizers
     if (colNameHeader.querySelector(".resizer")) return;
 
@@ -697,9 +698,9 @@
       const onMouseMove = (moveEvent) => {
         const newWidth = startWidth + (moveEvent.clientX - startX);
         // Set CSS variable on ROOT to update ALL tables simultaneously
-        if (newWidth > 50 && newWidth < 400) {
+        if (newWidth > 50 && newWidth < 800) {
           document.documentElement.style.setProperty(
-            "--name-col-width",
+            widthVar,
             `${newWidth}px`
           );
         }
@@ -723,7 +724,15 @@
     document.querySelector(".skills-table .col-name")
   );
   if (skillsHeaderName) {
-    attachResizer(skillsHeaderName);
+    attachResizer(skillsHeaderName, '--skills-col-width');
+  }
+
+  // Attach to Skills Table Description
+  const skillsHeaderDesc = /** @type {HTMLElement} */ (
+    document.querySelector(".skills-table .col-desc")
+  );
+  if (skillsHeaderDesc) {
+    attachResizer(skillsHeaderDesc, '--skills-desc-width');
   }
 
   // Also attach to Workflows Manager if it exists empty (though usually wiped on update)

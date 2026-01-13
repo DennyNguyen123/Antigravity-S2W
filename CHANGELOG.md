@@ -4,6 +4,18 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 
+## [0.2.2]
+
+### Added
+
+- **OneKey Install Skills**: Name and Description columns can now be resized independently.
+- **UI Enhancement**: Added text wrapping support for long skill names.
+
+### Fixed
+
+- **Superpowers Status**: Fixed status sync issue where installed skills appeared as not installed.
+- **Table Resizing**: Improved column resizer usability and visibility.
+
 ## [0.2.1]
 
 ### Added
