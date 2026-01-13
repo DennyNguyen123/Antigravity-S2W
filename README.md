@@ -56,7 +56,7 @@ Transform your installed AI Skills into Antigravity Global Workflow files. Colle
 > **About Manual Modifications**
 >
 > - To ensure the auto-update policy works correctly, please do not manually edit the `## Available Skills` section in `GEMINI.md`
-> - You can add or edit your custom rules in other sections of `GEMINI.md`
+> - You can add or edit your custom rules in other sections of `GEMINI.md` (either before `## Available Skills` or after it with a new `## Your Section` heading to prevent removal during updates)
 > - If upgrading from a version older than v0.2.1, it is recommended to manually remove the old `## Available Skills` section before updating to ensure the new version is applied correctly
 
 **How versioning works:**
