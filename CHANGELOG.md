@@ -1,6 +1,8 @@
-# Change Log
+# Changelog
 
-All notable changes to the "Antigravity Skill to Workflow" extension will be documented in this file.
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [0.2.1](https://github.com/KerrYang56/Antigravity-S2W/compare/v0.1.0...v0.2.1) (2026-01-13)
 
 ## [0.1.0] - 2026-01-12
 
