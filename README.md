@@ -3,7 +3,7 @@
 [繁體中文](README.zh-TW.md)
 
 > [!NOTE]
-> **Updated on 2026-01-12**
+> **Updated on 2026-01-13**
 >
 > - **Gemini CLI** preview now natively supports Skills! Learn more at [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli).
 > - **OneKey Install Superpowers** is an experimental feature pending upstream merge: [feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192). The bootstrap command will fail, but this extension automatically converts Superpowers skills to Global Workflows, making them available via `/` commands.
@@ -49,7 +49,22 @@ Transform your installed AI Skills into Antigravity Global Workflow files. Colle
 
 - Automatically adds "Available Skills" section to `~/.gemini/GEMINI.md` on first activation
 - AI agents will discover skills from trusted directories
-- One-time setup, no duplicate entries
+- **Version-tracked updates**: When extension updates with new rules, old section is automatically replaced
+- Version marker: `<!-- S2W_RULE_VERSION:1.0.0 -->`
+
+> [!IMPORTANT]
+> **About Manual Modifications**
+>
+> - ❌ **DO NOT** manually edit the `## Available Skills` section in `GEMINI.md`
+> - ✅ **DO** place your custom rules in other sections of `GEMINI.md`
+> - ⚠️ **Upgrading from older versions?** Manually remove the old `## Available Skills` section before updating the extension to ensure the new version is properly appended
+
+**How versioning works:**
+
+- First install: Appends rules with version marker
+- Same version: No changes made
+- New version: Automatically replaces old rules with updated content
+- No version marker (legacy): Treats as v0.0.0 and updates to current version
 
 ## Installation
 

@@ -685,11 +685,11 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   // --- Superpowers Installation ---
 
   /**
-   * 處理 Superpowers 安裝請求
+   * Handle Superpowers installation request
    */
   private async handleInstallSuperpowers() {
     try {
-      // 發送安裝進度
+      // Send installation progress
       this._view?.webview.postMessage({
         command: "superpowersProgress",
         text: "Installing Superpowers..."
@@ -702,14 +702,14 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
         });
       });
 
-      // 安裝成功
+      // Installation successful
       this._view?.webview.postMessage({
         command: "superpowersStatus",
         installed: true,
         text: "Superpowers installed successfully!"
       });
 
-      // 刷新 Workflow 列表（因為新增了 workflow commands）
+      // Refresh Workflow list (new workflow commands added)
       this.sendWorkflowList();
 
       vscode.window.showInformationMessage(
@@ -726,7 +726,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * 發送 Superpowers 安裝狀態給前端
+   * Send Superpowers installation status to frontend
    */
   private sendSuperpowersStatus() {
     if (this._view) {
@@ -740,11 +740,11 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * 處理 Superpowers 移除請求
+   * Handle Superpowers removal request
    */
   private async handleUninstallSuperpowers() {
     try {
-      // 發送移除進度
+      // Send removal progress
       this._view?.webview.postMessage({
         command: "superpowersProgress",
         text: "Uninstalling Superpowers..."
@@ -757,14 +757,14 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
         });
       });
 
-      // 移除成功
+      // Removal successful
       this._view?.webview.postMessage({
         command: "superpowersStatus",
         installed: false,
         text: "Superpowers removed successfully!"
       });
 
-      // 刷新 Workflow 列表
+      // Refresh Workflow list
       this.sendWorkflowList();
 
       vscode.window.showInformationMessage(
@@ -781,7 +781,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * 處理 Superpowers 更新請求
+   * Handle Superpowers update request
    */
   private async handleUpdateSuperpowers() {
     try {
@@ -818,7 +818,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   // --- Anthropic Skills ---
 
   /**
-   * 處理 Anthropic Skills 安裝請求
+   * Handle Anthropic Skills installation request
    */
   private async handleInstallAnthropic() {
     try {
@@ -853,7 +853,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * 處理 Anthropic Skills 移除請求
+   * Handle Anthropic Skills removal request
    */
   private async handleUninstallAnthropic() {
     try {
@@ -888,7 +888,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * 處理 Anthropic Skills 更新請求
+   * Handle Anthropic Skills update request
    */
   private async handleUpdateAnthropic() {
     try {
@@ -923,7 +923,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * 發送 Anthropic Skills 安裝狀態給前端
+   * Send Anthropic Skills installation status to frontend
    */
   private sendAnthropicStatus() {
     if (this._view) {

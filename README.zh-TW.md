@@ -3,7 +3,7 @@
 [English](README.md)
 
 > [!NOTE]
-> **更新於 2026-01-12**
+> **更新於 2026-01-13**
 >
 > - **Gemini CLI** 預覽版現已原生支援 Skills！前往 [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) 了解更多。
 > - **一鍵安裝 Superpowers** 為實驗性功能，正等待官方合併：[feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192)。Bootstrap 指令會失敗，但本擴充套件會自動將 Superpowers 技能轉換為 Global Workflows，可透過 `/` 指令使用。
@@ -49,7 +49,22 @@
 
 - 首次啟動自動在 `~/.gemini/GEMINI.md` 加入「Available Skills」區塊
 - AI 代理會自動從信任目錄發現可用技能
-- 一次性設定，不會重複添加
+- **版本追蹤更新**：當延伸模組更新規則時，會自動替換舊版本區塊
+- 版本標記：`<!-- S2W_RULE_VERSION:1.0.0 -->`
+
+> [!IMPORTANT]
+> **關於手動修改的重要提醒**
+>
+> - ❌ **請勿**手動編輯 `GEMINI.md` 中的 `## Available Skills` 區塊
+> - ✅ **請將**您的自訂規則放在 `GEMINI.md` 的其他區塊中
+> - ⚠️ **從舊版升級？**建議先手動移除 `GEMINI.md` 內的舊版 `## Available Skills` 區塊，再更新延伸模組，以確保新版本能正確附加
+
+**版本化機制說明：**
+
+- 首次安裝：附加規則並加上版本標記
+- 版本相同：不做任何變更
+- 新版本：自動替換舊規則為最新內容
+- 無版本標記（舊版）：視為 v0.0.0 並更新至目前版本
 
 ## 安裝方式
 

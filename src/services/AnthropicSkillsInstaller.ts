@@ -9,7 +9,7 @@ const execAsync = promisify(exec);
 
 /**
  * AnthropicSkillsInstaller
- * 負責 Anthropic Official Skills 的一鍵安裝流程。
+ * Handles one-click installation workflow for Anthropic Official Skills.
  */
 export class AnthropicSkillsInstaller {
   private homeDir: string;
@@ -32,7 +32,7 @@ export class AnthropicSkillsInstaller {
   }
 
   /**
-   * 檢查是否已安裝
+   * Check if already installed
    */
   public isInstalled(): boolean {
     const skillsDir = this.getSkillsPath();
@@ -40,7 +40,7 @@ export class AnthropicSkillsInstaller {
   }
 
   /**
-   * 執行完整安裝流程
+   * Execute complete installation workflow
    */
   public async install(onProgress?: (step: string) => void): Promise<void> {
     // Step 1: Clone Repository
@@ -55,12 +55,15 @@ export class AnthropicSkillsInstaller {
   }
 
   /**
-   * 更新已安裝的 skills
+   * Update installed skills
    */
   public async update(onProgress?: (step: string) => void): Promise<void> {
     if (!fs.existsSync(this.skillsRepoDir)) {
       throw new Error("Anthropic Skills not installed. Please install first.");
     }
+
+    onProgress?.("Cleaning old workflows...");
+    await this.removeGeneratedWorkflows();
 
     onProgress?.("Updating Anthropic Skills...");
     await execAsync("git pull", { cwd: this.skillsRepoDir });
@@ -72,7 +75,7 @@ export class AnthropicSkillsInstaller {
   }
 
   /**
-   * 克隆專案
+   * Clone repository
    */
   private async cloneRepository(): Promise<void> {
     const repoUrl = "https://github.com/anthropics/skills.git";
@@ -90,7 +93,7 @@ export class AnthropicSkillsInstaller {
   }
 
   /**
-   * 產生 workflows
+   * Generate workflows
    */
   private async generateWorkflows(): Promise<void> {
     const skillsDir = this.getSkillsPath();
@@ -104,11 +107,11 @@ export class AnthropicSkillsInstaller {
     }
 
     const generator = new WorkflowGenerator();
-    await generator.generate(skillsDir, this.globalWorkflowsDir);
+    await generator.generate(skillsDir, this.globalWorkflowsDir, "anthropic");
   }
 
   /**
-   * 移除安裝
+   * Remove installation
    */
   public async uninstall(onProgress?: (step: string) => void): Promise<void> {
     onProgress?.("Removing generated workflows...");
@@ -121,7 +124,7 @@ export class AnthropicSkillsInstaller {
   }
 
   /**
-   * 移除產生的 workflow 檔案
+   * Remove generated workflow files
    */
   private async removeGeneratedWorkflows(): Promise<void> {
     const skillsDir = this.getSkillsPath();
@@ -136,13 +139,11 @@ export class AnthropicSkillsInstaller {
       .map((d) => d.name);
 
     for (const skillName of skillDirs) {
-      const workflowFile = path.join(
-        this.globalWorkflowsDir,
-        `${skillName}.md`
-      );
+      const fileName = `anthropic_${skillName}.md`;
+      const workflowFile = path.join(this.globalWorkflowsDir, fileName);
       const workflowFileDisabled = path.join(
         this.globalWorkflowsDir,
-        `${skillName}.md.disable`
+        `${fileName}.disable`
       );
 
       if (fs.existsSync(workflowFile)) {
@@ -155,7 +156,7 @@ export class AnthropicSkillsInstaller {
   }
 
   /**
-   * 移除 repository 目錄
+   * Remove repository directory
    */
   private removeRepository(): void {
     if (fs.existsSync(this.skillsRepoDir)) {
@@ -164,14 +165,14 @@ export class AnthropicSkillsInstaller {
   }
 
   /**
-   * 取得 skills 目錄路徑
+   * Get skills directory path
    */
   public getSkillsPath(): string {
     return path.join(this.skillsRepoDir, "skills");
   }
 
   /**
-   * 取得安裝路徑
+   * Get installation path
    */
   public getInstallPath(): string {
     return this.skillsRepoDir;

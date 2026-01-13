@@ -9,7 +9,7 @@ const execAsync = promisify(exec);
 
 /**
  * SuperpowersInstaller
- * 負責 Superpowers 專案的一鍵安裝流程。
+ * Handles one-click installation workflow for Superpowers project.
  */
 export class SuperpowersInstaller {
   private homeDir: string;
@@ -34,10 +34,10 @@ export class SuperpowersInstaller {
   }
 
   /**
-   * 檢查 Superpowers 是否已安裝
+   * Check if Superpowers is already installed
    */
   public isInstalled(): boolean {
-    // 檢查標誌性檔案存在
+    // Check if marker file exists
     const markerFile = path.join(
       this.superpowersDir,
       ".antigravity",
@@ -47,8 +47,8 @@ export class SuperpowersInstaller {
   }
 
   /**
-   * 執行完整安裝流程
-   * @param onProgress 進度回呼（可選）
+   * Execute complete installation workflow
+   * @param onProgress Progress callback (optional)
    */
   public async install(onProgress?: (step: string) => void): Promise<void> {
     // Step 1: Clone Repository
@@ -71,22 +71,27 @@ export class SuperpowersInstaller {
   }
 
   /**
-   * 更新已安裝的 Superpowers
+   * Update installed Superpowers
    */
   public async update(onProgress?: (step: string) => void): Promise<void> {
     if (!fs.existsSync(this.superpowersDir)) {
       throw new Error("Superpowers not installed. Please install first.");
     }
 
-    // Step 1: Git pull
+    // Step 1: Clean old data (Mirror-like update)
+    onProgress?.("Cleaning old workflows and commands...");
+    await this.removeGeneratedWorkflows();
+    this.removeWorkflowCommands();
+
+    // Step 2: Git pull
     onProgress?.("Pulling latest changes...");
     await execAsync("git pull", { cwd: this.superpowersDir });
 
-    // Step 2: Update commands
+    // Step 3: Update commands
     onProgress?.("Updating workflow commands...");
     this.copyWorkflowCommands();
 
-    // Step 3: Regenerate workflows
+    // Step 4: Regenerate workflows
     onProgress?.("Regenerating workflows...");
     await this.generateWorkflowsFromSkills();
 
@@ -94,60 +99,60 @@ export class SuperpowersInstaller {
   }
 
   /**
-   * 克隆 Superpowers 專案到本地
+   * Clone Superpowers project to local directory
    */
   private async cloneRepository(): Promise<void> {
     const repoUrl = "https://github.com/obra/superpowers.git";
 
-    // 確保父目錄存在
+    // Ensure parent directory exists
     const parentDir = path.dirname(this.superpowersDir);
     if (!fs.existsSync(parentDir)) {
       fs.mkdirSync(parentDir, { recursive: true });
     }
 
-    // 如果目錄已存在，使用 git pull 更新；否則 clone
+    // If directory exists, use git pull to update; otherwise clone
     if (fs.existsSync(this.superpowersDir)) {
-      // 更新現有專案
+      // Update existing project
       await execAsync("git pull", { cwd: this.superpowersDir });
     } else {
-      // 全新安裝
+      // Fresh installation
       await execAsync(`git clone "${repoUrl}" "${this.superpowersDir}"`);
     }
   }
 
   /**
-   * 設定 ~/.gemini/GEMINI.md，加入 bootstrap 指令
+   * Configure ~/.gemini/GEMINI.md, add bootstrap command
    */
   private configureGeminiMd(): void {
     const bootstrapBlock = this.getBootstrapBlock();
 
-    // 確保目錄存在
+    // Ensure directory exists
     const geminiDir = path.dirname(this.geminiMdPath);
     if (!fs.existsSync(geminiDir)) {
       fs.mkdirSync(geminiDir, { recursive: true });
     }
 
-    // 讀取現有內容（如果存在）
+    // Read existing content (if exists)
     let existingContent = "";
     if (fs.existsSync(this.geminiMdPath)) {
       existingContent = fs.readFileSync(this.geminiMdPath, "utf8");
     }
 
-    // 如果已經包含 bootstrap 區塊，則不重複添加
+    // If already contains bootstrap block, don't add again
     if (
       existingContent.includes("<EXTREMELY_IMPORTANT>") &&
       existingContent.includes("superpowers")
     ) {
-      return; // 已設定
+      return; // Already configured
     }
 
-    // 附加 bootstrap 區塊
+    // Append bootstrap block
     const newContent = existingContent + "\n" + bootstrapBlock;
     fs.writeFileSync(this.geminiMdPath, newContent, "utf8");
   }
 
   /**
-   * 複製 workflow 指令到 global_workflows 目錄
+   * Copy workflow commands to global_workflows directory
    */
   private copyWorkflowCommands(): void {
     const commandsDir = path.join(
@@ -156,17 +161,17 @@ export class SuperpowersInstaller {
       "commands"
     );
 
-    // 確保目標目錄存在
+    // Ensure target directory exists
     if (!fs.existsSync(this.globalWorkflowsDir)) {
       fs.mkdirSync(this.globalWorkflowsDir, { recursive: true });
     }
 
-    // 如果 commands 目錄不存在，跳過
+    // Skip if commands directory doesn't exist
     if (!fs.existsSync(commandsDir)) {
       return;
     }
 
-    // 複製所有 .md 檔案
+    // Copy all .md files
     const files = fs.readdirSync(commandsDir);
     for (const file of files) {
       if (file.endsWith(".md")) {
@@ -178,10 +183,10 @@ export class SuperpowersInstaller {
   }
 
   /**
-   * 產生 bootstrap 區塊內容
+   * Generate bootstrap block content
    */
   private getBootstrapBlock(): string {
-    // 根據作業系統決定執行指令
+    // Determine run command based on operating system
     const isWindows = os.platform() === "win32";
     const runCommand = isWindows
       ? "node $env:USERPROFILE\\.antigravity\\superpowers\\.antigravity\\superpowers-antigravity bootstrap"
@@ -198,58 +203,58 @@ You have superpowers. Superpowers teach you new skills and capabilities.
   }
 
   /**
-   * 取得安裝路徑（供 UI 顯示用）
+   * Get installation path (for UI display)
    */
   public getInstallPath(): string {
     return this.superpowersDir;
   }
 
   /**
-   * 取得 Superpowers skills 目錄路徑
+   * Get Superpowers skills directory path
    */
   public getSkillsPath(): string {
     return path.join(this.superpowersDir, "skills");
   }
 
   /**
-   * 將 Superpowers skills 轉換為 workflows
+   * Convert Superpowers skills to workflows
    */
   private async generateWorkflowsFromSkills(): Promise<void> {
     const skillsDir = this.getSkillsPath();
     
-    // 如果 skills 目錄不存在，跳過
+    // Skip if skills directory doesn't exist
     if (!fs.existsSync(skillsDir)) {
       return;
     }
 
-    // 確保目標目錄存在
+    // Ensure target directory exists
     if (!fs.existsSync(this.globalWorkflowsDir)) {
       fs.mkdirSync(this.globalWorkflowsDir, { recursive: true });
     }
 
-    // 使用 WorkflowGenerator 轉換 skills
+    // Use WorkflowGenerator to convert skills
     const generator = new WorkflowGenerator();
-    await generator.generate(skillsDir, this.globalWorkflowsDir);
+    await generator.generate(skillsDir, this.globalWorkflowsDir, "superpowers");
   }
 
   /**
-   * 移除 Superpowers 安裝
-   * @param onProgress 進度回呼（可選）
+   * Remove Superpowers installation
+   * @param onProgress Progress callback (optional)
    */
   public async uninstall(onProgress?: (step: string) => void): Promise<void> {
-    // Step 1: 移除產生的 workflows (來自 Superpowers skills)
+    // Step 1: Remove generated workflows (from Superpowers skills)
     onProgress?.("Removing generated workflows...");
     await this.removeGeneratedWorkflows();
 
-    // Step 2: 移除 commands
+    // Step 2: Remove commands
     onProgress?.("Removing workflow commands...");
     this.removeWorkflowCommands();
 
-    // Step 3: 移除 GEMINI.md 中的 bootstrap 區塊
+    // Step 3: Remove bootstrap block from GEMINI.md
     onProgress?.("Cleaning GEMINI.md...");
     this.removeGeminiMdBlock();
 
-    // Step 4: 移除 Superpowers 目錄
+    // Step 4: Remove Superpowers directory
     onProgress?.("Removing Superpowers directory...");
     this.removeSuperpowersDirectory();
 
@@ -257,7 +262,7 @@ You have superpowers. Superpowers teach you new skills and capabilities.
   }
 
   /**
-   * 移除產生的 workflow 檔案
+   * Remove generated workflow files
    */
   private async removeGeneratedWorkflows(): Promise<void> {
     const skillsDir = this.getSkillsPath();
@@ -266,15 +271,16 @@ You have superpowers. Superpowers teach you new skills and capabilities.
       return;
     }
 
-    // 列出所有 skill 名稱
+    // List all skill names
     const skillDirs = fs.readdirSync(skillsDir, { withFileTypes: true })
       .filter(d => d.isDirectory())
       .map(d => d.name);
 
-    // 移除對應的 workflow 檔案
+    // Remove corresponding workflow files
     for (const skillName of skillDirs) {
-      const workflowFile = path.join(this.globalWorkflowsDir, `${skillName}.md`);
-      const workflowFileDisabled = path.join(this.globalWorkflowsDir, `${skillName}.md.disable`);
+      const fileName = `superpowers_${skillName}.md`;
+      const workflowFile = path.join(this.globalWorkflowsDir, fileName);
+      const workflowFileDisabled = path.join(this.globalWorkflowsDir, `${fileName}.disable`);
       
       if (fs.existsSync(workflowFile)) {
         fs.rmSync(workflowFile, { force: true });
@@ -286,7 +292,7 @@ You have superpowers. Superpowers teach you new skills and capabilities.
   }
 
   /**
-   * 移除複製的 command 檔案
+   * Remove copied command files
    */
   private removeWorkflowCommands(): void {
     const commandsDir = path.join(this.superpowersDir, ".antigravity", "commands");
@@ -295,11 +301,11 @@ You have superpowers. Superpowers teach you new skills and capabilities.
       return;
     }
 
-    // 列出所有 command 檔案
+    // List all command files
     const commandFiles = fs.readdirSync(commandsDir)
       .filter(f => f.endsWith(".md"));
 
-    // 移除對應的檔案
+    // Remove corresponding files
     for (const file of commandFiles) {
       const targetFile = path.join(this.globalWorkflowsDir, file);
       const targetFileDisabled = path.join(this.globalWorkflowsDir, `${file}.disable`);
@@ -314,7 +320,7 @@ You have superpowers. Superpowers teach you new skills and capabilities.
   }
 
   /**
-   * 從 GEMINI.md 移除 Superpowers bootstrap 區塊
+   * Remove Superpowers bootstrap block from GEMINI.md
    */
   private removeGeminiMdBlock(): void {
     if (!fs.existsSync(this.geminiMdPath)) {
@@ -323,8 +329,8 @@ You have superpowers. Superpowers teach you new skills and capabilities.
 
     let content = fs.readFileSync(this.geminiMdPath, "utf8");
     
-    // 移除 Superpowers System 區塊
-    // 匹配 ## Superpowers System 開頭到 </EXTREMELY_IMPORTANT> 結尾
+    // Remove Superpowers System block
+    // Match from ## Superpowers System to </EXTREMELY_IMPORTANT>
     const regex = /\n*## Superpowers System[\s\S]*?<\/EXTREMELY_IMPORTANT>\s*/g;
     content = content.replace(regex, "");
 
@@ -332,7 +338,7 @@ You have superpowers. Superpowers teach you new skills and capabilities.
   }
 
   /**
-   * 移除 Superpowers 目錄
+   * Remove Superpowers directory
    */
   private removeSuperpowersDirectory(): void {
     if (fs.existsSync(this.superpowersDir)) {
