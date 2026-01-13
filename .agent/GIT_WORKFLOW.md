@@ -30,6 +30,22 @@ Follow the **Conventional Commits** specification.
 
 * **Subject & Body**: MUST be in **English**.
 
+**Strict Body Policy (Zero Tolerance for Laziness)**:
+
+* **NO One-Liners**: Every commit representing a completed User Request or Task MUST have a descriptive body.
+* **Detailed Bullet Points**: Use the body to explain *what* changed and *why*.
+* **Release Commits**: MUST include a summary of the features/fixes included in the release (copy from Changelog if needed).
+  * *Bad*: `chore(release): bump version to 0.2.2`
+  * *Good*:
+
+        ```text
+        chore(release): bump version to 0.2.2
+
+        - feat: Implement independent column resizing
+        - feat: Add text wrapping for Name column
+        - fix: Repair Superpowers installation status check
+        ```
+
 **Format**: `<type>(<scope>): <subject>`
 
 **Common Types**:
