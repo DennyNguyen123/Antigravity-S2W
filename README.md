@@ -3,10 +3,9 @@
 [繁體中文](README.zh-TW.md)
 
 > [!NOTE]
-> **Updated on 2026-01-14**
+> **Updated on 2026-01-15**
 >
 > - **Gemini CLI** now officially supports Agent Skills! See [v0.24.0 Release](https://github.com/google-gemini/gemini-cli/releases/tag/v0.24.0) for details.
-> - **OneKey Install Superpowers** is an experimental feature pending upstream merge: [feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192). The bootstrap command will fail, but this extension automatically converts Superpowers skills to Global Workflows, making them available via `/` commands.
 
 ![Antigravity-S2W Screenshot](resources/screenshot.jpg)
 
@@ -67,8 +66,8 @@ Install directly from [Open VSX Registry](https://open-vsx.org/extension/kerryan
 | **Generate Workflows** | Select skill source → Click "Generate Workflows" |
 | **Import from ZIP** | Click "Select ZIP Files..." → Choose `.zip` files |
 | **Import from GitHub** | Click "Import from URL..." → Paste GitHub folder URL |
-| **OneKey Install Skills** | Select categories → Click "Apply Changes" |
-| **Manual Update** | Click ↻ icon to fetch latest data |
+| **OneKey Install Skills** | Switch ON / Select categories → Click "Apply Changes" |
+| **Manual Update Skills** | Click ↻ icon to fetch latest data |
 | **Manage Workflows** | ⏻ Toggle · ✎ Edit · ✕ Delete |
 
 ## File Locations
@@ -91,5 +90,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 - [jszip](https://github.com/Stuk/jszip) - ZIP file handling (MIT)
 - [Superpowers](https://github.com/obra/superpowers) - AI skills for brainstorming & planning
 - [Anthropic Skills](https://github.com/anthropics/skills) - Official Claude skills
-- Antigravity Official [Skills Documentation](https://antigravity.google/docs/skills#example-a-code-review-skill)
 - [claude-code-templates](https://github.com/davila7/claude-code-templates/tree/main/cli-tool/components/skills) by davila7 (MIT License)

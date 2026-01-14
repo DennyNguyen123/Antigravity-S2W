@@ -57,10 +57,10 @@ jobs:
 
           if [ -z "$PREV_TAG" ]; then
             echo "No previous tag found. Generating full changelog..."
-            git log --pretty=format:"* %s (%h)" > CHANGELOG.txt
+            git log --pretty=format:"* %s (%h)%n%b" > CHANGELOG.txt
           else
             echo "Generating changelog from $PREV_TAG to HEAD..."
-            git log --pretty=format:"* %s (%h)" ${PREV_TAG}..HEAD > CHANGELOG.txt
+            git log --pretty=format:"* %s (%h)%n%b" ${PREV_TAG}..HEAD > CHANGELOG.txt
           fi
 
           echo "Changelog Content:"
