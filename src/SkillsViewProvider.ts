@@ -5,6 +5,7 @@ import { PathManager } from "./services/PathManager";
 import { WorkflowGenerator } from "./services/WorkflowGenerator";
 import { SuperpowersInstaller } from "./services/SuperpowersInstaller";
 import { AnthropicSkillsInstaller } from "./services/AnthropicSkillsInstaller";
+import { DavilaSkillsInstaller } from "./services/DavilaSkillsInstaller";
 // Note: Installer logic can be simple enough to be inline or imported if we had a separate file.
 import * as JSZip from "jszip";
 import * as os from "os";
@@ -17,12 +18,14 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   private workflowGenerator: WorkflowGenerator;
   private superpowersInstaller: SuperpowersInstaller;
   private anthropicInstaller: AnthropicSkillsInstaller;
+  private davilaInstaller: DavilaSkillsInstaller;
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this.pathManager = new PathManager();
     this.workflowGenerator = new WorkflowGenerator();
     this.superpowersInstaller = new SuperpowersInstaller();
     this.anthropicInstaller = new AnthropicSkillsInstaller();
+    this.davilaInstaller = new DavilaSkillsInstaller();
   }
 
   public resolveWebviewView(
@@ -123,6 +126,19 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
         case "updateAnthropic":
            await this.handleUpdateAnthropic();
            break;
+        // Davila Skills handlers
+        case "installDavila":
+           await this.handleInstallDavila(data.categories);
+           break;
+        case "uninstallDavila":
+           await this.handleUninstallDavila();
+           break;
+        case "checkDavila":
+           this.sendDavilaStatus();
+           break;
+        case "updateDavila":
+           await this.handleUpdateDavila();
+           break;
       }
     });
   }
@@ -146,40 +162,94 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
         const matchRoot = url.match(regexRoot);
         if (matchRoot) {
              [, owner, repo] = matchRoot;
-             branch = 'HEAD'; // Use default branch via HEAD ref
-             folderPath = ''; // Root
+             branch = 'HEAD';
+             folderPath = '';
         } else {
              throw new Error("Invalid URL. Supported formats:\n1. https://github.com/owner/repo\n2. https://github.com/owner/repo/tree/branch/path");
         }
     }
 
-    const skillName = folderPath ? path.basename(folderPath) : repo; 
-    
-    // Prepare Destination
     const skillsDir = this.pathManager.getSkillsPath();
-    const destDir = path.join(skillsDir, skillName);
-    
-    if (fs.existsSync(destDir)) {
-        fs.rmSync(destDir, { recursive: true, force: true });
+    if (!fs.existsSync(skillsDir)) {
+      fs.mkdirSync(skillsDir, { recursive: true });
     }
-    fs.mkdirSync(destDir, { recursive: true });
 
-    // vscode.window.showInformationMessage(`Downloading '${skillName}' from GitHub...`);
-
-    // Recursive Download
-    await this.recursiveDownload(owner, repo, branch, folderPath, destDir);
+    // Check if target folder contains SKILL.md directly or has subfolders with skills
+    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${folderPath}?ref=${branch}`;
+    const items = await this.httpsGet_Json(apiUrl);
     
-    // vscode.window.showInformationMessage(`Download complete: ${skillName}`);
+    if (!Array.isArray(items)) {
+      throw new Error(`Remote path is not a directory: ${folderPath}`);
+    }
 
-    // Generate & Refresh
+    // Check if this folder directly contains SKILL.md or README.md
+    const hasSkillFile = items.some((item: any) => 
+      item.type === 'file' && (item.name.toLowerCase() === 'skill.md' || item.name.toLowerCase() === 'readme.md')
+    );
+
+    let installedSkills: string[] = [];
+
+    if (hasSkillFile) {
+      // This is a single skill folder - install directly
+      const skillName = folderPath ? path.basename(folderPath) : repo;
+      const destDir = path.join(skillsDir, skillName);
+      
+      if (fs.existsSync(destDir)) {
+        fs.rmSync(destDir, { recursive: true, force: true });
+      }
+      fs.mkdirSync(destDir, { recursive: true });
+      
+      await this.recursiveDownload(owner, repo, branch, folderPath, destDir);
+      installedSkills.push(skillName);
+    } else {
+      // This is a parent folder - scan subfolders for skills
+      const subDirs = items.filter((item: any) => item.type === 'dir');
+      
+      for (const subDir of subDirs) {
+        // Check if subfolder contains SKILL.md
+        const subApiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${subDir.path}?ref=${branch}`;
+        try {
+          const subItems = await this.httpsGet_Json(subApiUrl);
+          const hasSkill = subItems.some((item: any) => 
+            item.type === 'file' && (item.name.toLowerCase() === 'skill.md' || item.name.toLowerCase() === 'readme.md')
+          );
+          
+          if (hasSkill) {
+            const skillName = subDir.name;
+            const destDir = path.join(skillsDir, skillName);
+            
+            if (fs.existsSync(destDir)) {
+              fs.rmSync(destDir, { recursive: true, force: true });
+            }
+            fs.mkdirSync(destDir, { recursive: true });
+            
+            await this.recursiveDownload(owner, repo, branch, subDir.path, destDir);
+            installedSkills.push(skillName);
+          }
+        } catch (e) {
+          // Skip folders that can't be accessed
+          console.error(`Failed to scan ${subDir.name}:`, e);
+        }
+      }
+    }
+
+    if (installedSkills.length === 0) {
+      throw new Error("No skills found. Ensure the folder contains SKILL.md or README.md.");
+    }
+
+    // Generate workflows
     const workflowsDir = this.pathManager.getDestinationPath();
     await this.workflowGenerator.generate(skillsDir, workflowsDir);
     this.sendWorkflowList();
     
+    const message = installedSkills.length === 1 
+      ? `Installed '${installedSkills[0]}' from GitHub`
+      : `Installed ${installedSkills.length} skills: ${installedSkills.join(', ')}`;
+    
     this._view?.webview.postMessage({ 
         command: "status", 
         type: "success", 
-        text: `Installed '${skillName}' from GitHub` 
+        text: message
     });
   }
 
@@ -1003,5 +1073,111 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     }
 
     return htmlContent;
+  }
+
+  // --- Davila Skills ---
+
+  private async handleInstallDavila(categories: string[]) {
+    try {
+      this._view?.webview.postMessage({
+        command: "davilaProgress",
+        text: "Syncing Community Skills..."
+      });
+
+      await this.davilaInstaller.install(categories, (step) => {
+        this._view?.webview.postMessage({
+          command: "davilaProgress",
+          text: step
+        });
+      });
+
+      this.sendDavilaStatus("Community Skills synced!");
+      this.sendWorkflowList();
+      vscode.window.showInformationMessage("Community Skills synced!");
+    } catch (e: any) {
+      this._view?.webview.postMessage({
+        command: "davilaStatus",
+        installed: false,
+        text: `Installation failed: ${e.message}`,
+        categories: []
+      });
+      vscode.window.showErrorMessage(`Davila Skills installation failed: ${e.message}`);
+    }
+  }
+
+  private async handleUninstallDavila() {
+    try {
+      this._view?.webview.postMessage({
+         command: "davilaProgress",
+         text: "Uninstalling Davila Skills..."
+      });
+
+      await this.davilaInstaller.uninstall((step) => {
+        this._view?.webview.postMessage({
+          command: "davilaProgress",
+          text: step
+        });
+      });
+
+      this.sendDavilaStatus("Davila Skills removed!");
+      this.sendWorkflowList();
+      vscode.window.showInformationMessage("Davila Skills removed!");
+    } catch (e: any) {
+       this._view?.webview.postMessage({
+         command: "davilaProgress",
+         text: `Error: ${e.message}`
+       });
+       vscode.window.showErrorMessage(`Removal failed: ${e.message}`);
+    }
+  }
+
+  private async handleUpdateDavila() {
+      try {
+        const info = this.davilaInstaller.getInstallInfo();
+        const currentCategories = info?.categories || [];
+        
+        if (currentCategories.length === 0) {
+           vscode.window.showInformationMessage("No Community Skills installed to update.");
+           return;
+        }
+
+        this._view?.webview.postMessage({
+           command: "davilaProgress",
+           text: "Updating installed categories..."
+        });
+
+        // Sync with existing categories = Re-download/Update (force=true)
+        await this.davilaInstaller.sync(currentCategories, (step) => {
+           this._view?.webview.postMessage({
+             command: "davilaProgress",
+             text: step
+           });
+        }, true);
+
+        this.sendDavilaStatus("Community Skills updated!");
+        this.sendWorkflowList();
+        vscode.window.showInformationMessage("Community Skills updated!");
+      } catch (e: any) {
+        this._view?.webview.postMessage({
+           command: "davilaProgress",
+           text: `Update failed: ${e.message}`
+        });
+        vscode.window.showErrorMessage(`Update failed: ${e.message}`);
+      }
+  }
+
+  private sendDavilaStatus(message?: string) {
+     if (this._view) {
+       const info = this.davilaInstaller.getInstallInfo();
+       const installed = this.davilaInstaller.isInstalled();
+       
+       this._view.webview.postMessage({
+         command: "davilaStatus",
+         installed: installed,
+         text: message,
+         categories: info?.categories || [],
+         availableCategories: DavilaSkillsInstaller.CATEGORIES 
+       });
+     }
   }
 }

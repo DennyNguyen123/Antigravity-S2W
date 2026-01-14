@@ -78,13 +78,19 @@
             <div class="col-desc">DESCRIPTION</div>
             <div class="col-action">ACTION</div>
           </li>
-          
+
           <!-- Superpowers Row -->
           <li class="workflow-row superpowers-row">
             <div class="col-name">Superpowers</div>
             <div class="col-desc">Advanced custom skills & tools</div>
             <div class="col-action">
-              <button id="superpowers-update-btn" class="btn-icon-ghost" title="Update Superpowers">↻</button>
+              <button
+                id="superpowers-update-btn"
+                class="btn-icon-ghost"
+                title="Update Superpowers"
+              >
+                ↻
+              </button>
               <label class="toggle-switch">
                 <input type="checkbox" id="superpowers-toggle" />
                 <span class="toggle-slider"></span>
@@ -97,23 +103,92 @@
             <div class="col-name">Anthropic Skills</div>
             <div class="col-desc">Pre-built AI capabilities & prompts</div>
             <div class="col-action">
-              <button id="anthropic-update-btn" class="btn-icon-ghost" title="Update Anthropic Skills">↻</button>
+              <button
+                id="anthropic-update-btn"
+                class="btn-icon-ghost"
+                title="Update Anthropic Skills"
+              >
+                ↻
+              </button>
               <label class="toggle-switch">
                 <input type="checkbox" id="anthropic-toggle" />
                 <span class="toggle-slider"></span>
               </label>
             </div>
           </li>
+
+          <!-- Davila Skills Row -->
+          <li class="workflow-row davila-row">
+            <div class="col-name">
+              Community Skills (Davila7)
+            </div>
+            <div class="col-desc">Massive collection of categorized skills</div>
+            <div class="col-action">
+              <button
+                id="davila-update-btn"
+                class="btn-icon-ghost"
+                title="Update Community Skills"
+              >
+                ↻
+              </button>
+              <button
+                id="davila-expand-btn"
+                class="btn-icon-ghost"
+                title="Expand Categories"
+              >
+                ▼
+              </button>
+            </div>
+          </li>
+
+          <!-- Davila Categories Expansion -->
+          <li
+            id="davila-categories-panel"
+            class="davila-panel hidden"
+            style="
+              display: none;
+              flex-direction: column;
+              background: var(--vscode-list-hoverBackground);
+              padding: 10px;
+            "
+          >
+            <div
+              class="davila-controls"
+              style="margin-bottom: 10px; display: flex; gap: 8px"
+            >
+              <button id="davila-select-all" class="btn-sm">Select All</button>
+              <button id="davila-deselect-all" class="btn-sm">
+                Deselect All
+              </button>
+              <button id="davila-install-btn" class="btn-sm btn-primary">
+                Apply Changes
+              </button>
+            </div>
+            <div
+              id="davila-categories-list"
+              class="categories-grid"
+              style="
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 5px;
+              "
+            >
+              <div class="loading">Loading categories...</div>
+            </div>
+          </li>
         </ul>
-        <div id="superpowers-status" class="status-text hidden"></div>
-        <div id="anthropic-status" class="status-text hidden"></div>
+        <div id="onekey-status" class="status-text hidden"></div>
       </section>
 
       <!-- Manager Section -->
       <section class="workflow-list-section">
         <div class="section-header">
           <h3>WORKFLOWS MANAGER</h3>
-          <button id="refresh-btn" class="btn-icon-ghost" title="Refresh/Update">
+          <button
+            id="refresh-btn"
+            class="btn-icon-ghost"
+            title="Refresh/Update"
+          >
             ↻
           </button>
         </div>

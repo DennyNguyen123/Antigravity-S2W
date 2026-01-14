@@ -42,24 +42,21 @@
   const workflowList = document.getElementById("workflow-list");
   /** @type {HTMLElement | null} */
   const refreshBtn = document.getElementById("refresh-btn");
-  // Superpowers elements
+  // OneKey elements
+  /** @type {HTMLElement | null} */
+  const onekeyStatus = document.getElementById("onekey-status");
   /** @type {HTMLInputElement | null} */
   const superpowersToggle = /** @type {any} */ (
     document.getElementById("superpowers-toggle")
   );
-  /** @type {HTMLElement | null} */
-  const superpowersStatus = document.getElementById("superpowers-status");
   /** @type {HTMLButtonElement | null} */
   const superpowersUpdateBtn = /** @type {any} */ (
     document.getElementById("superpowers-update-btn")
   );
-  // Anthropic elements
   /** @type {HTMLInputElement | null} */
   const anthropicToggle = /** @type {any} */ (
     document.getElementById("anthropic-toggle")
   );
-  /** @type {HTMLElement | null} */
-  const anthropicStatus = document.getElementById("anthropic-status");
   /** @type {HTMLButtonElement | null} */
   const anthropicUpdateBtn = /** @type {any} */ (
     document.getElementById("anthropic-update-btn")
@@ -169,10 +166,10 @@
         break;
       case "superpowersProgress":
         // Show installation progress
-        if (superpowersStatus) {
-          superpowersStatus.textContent = message.text;
-          superpowersStatus.className = "status-text info";
-          superpowersStatus.classList.remove("hidden");
+        if (onekeyStatus) {
+          onekeyStatus.textContent = message.text;
+          onekeyStatus.className = "status-text info";
+          onekeyStatus.classList.remove("hidden");
         }
         break;
       case "anthropicStatus":
@@ -181,10 +178,10 @@
         break;
       case "anthropicProgress":
         // Show installation progress
-        if (anthropicStatus) {
-          anthropicStatus.textContent = message.text;
-          anthropicStatus.className = "status-text info";
-          anthropicStatus.classList.remove("hidden");
+        if (onekeyStatus) {
+          onekeyStatus.textContent = message.text;
+          onekeyStatus.className = "status-text info";
+          onekeyStatus.classList.remove("hidden");
         }
         break;
     }
@@ -309,14 +306,14 @@
       superpowersToggle.checked = installed;
       superpowersToggle.disabled = false;
     }
-    if (superpowersStatus && text) {
-      superpowersStatus.textContent = text;
-      superpowersStatus.className =
+    if (onekeyStatus && text) {
+      onekeyStatus.textContent = text;
+      onekeyStatus.className =
         "status-text " + (installed ? "success" : "info");
-      superpowersStatus.classList.remove("hidden");
+      onekeyStatus.classList.remove("hidden");
       // Auto-hide after 10 seconds
       setTimeout(() => {
-        superpowersStatus.classList.add("hidden");
+        if (onekeyStatus) onekeyStatus.classList.add("hidden");
       }, 10000);
     }
     // Show/hide update button
@@ -366,19 +363,203 @@
       anthropicToggle.checked = installed;
       anthropicToggle.disabled = false;
     }
-    if (anthropicStatus && text) {
-      anthropicStatus.textContent = text;
-      anthropicStatus.className =
+    if (onekeyStatus && text) {
+      onekeyStatus.textContent = text;
+      onekeyStatus.className =
         "status-text " + (installed ? "success" : "info");
-      anthropicStatus.classList.remove("hidden");
+      onekeyStatus.classList.remove("hidden");
       setTimeout(() => {
-        anthropicStatus.classList.add("hidden");
+        if (onekeyStatus) onekeyStatus.classList.add("hidden");
       }, 10000);
     }
     // Show/hide update button
     if (anthropicUpdateBtn) {
       anthropicUpdateBtn.style.display = installed ? "flex" : "none";
     }
+  }
+
+  // --- Davila Skills Logic ---
+
+  const davilaExpandBtn = document.getElementById("davila-expand-btn");
+  const davilaUpdateBtn = /** @type {any} */ (document.getElementById("davila-update-btn"));
+  const davilaPanel = document.getElementById("davila-categories-panel");
+  const davilaInstallBtn = document.getElementById("davila-install-btn");
+  // const davilaUninstallBtn = document.getElementById("davila-uninstall-all-btn"); // Removed
+  const davilaSelectAllBtn = document.getElementById("davila-select-all");
+  const davilaDeselectAllBtn = document.getElementById("davila-deselect-all");
+  const davilaStatus = onekeyStatus; // Link to shared status
+  const davilaCategoriesList = document.getElementById("davila-categories-list");
+
+  /** @type {string[]} */
+  let davilaAvailableCategories = []; // Loaded from backend
+  /** @type {string[]} */
+  let davilaCurrentInstalledCategories = []; // Loaded from backend
+
+  // Request initial status
+  vscode.postMessage({ command: "checkDavila" });
+
+  if (davilaExpandBtn && davilaPanel) {
+    davilaExpandBtn.addEventListener("click", () => {
+      const isHidden = davilaPanel.classList.contains("hidden") || davilaPanel.style.display === "none";
+      if (isHidden) {
+        davilaPanel.classList.remove("hidden");
+        davilaPanel.style.display = "flex";
+        // davilaExpandBtn.innerHTML = "▲";
+        davilaExpandBtn.style.transform = "rotate(180deg)";
+        
+        // Refresh status when opening
+        vscode.postMessage({ command: "checkDavila" });
+      } else {
+        davilaPanel.classList.add("hidden");
+        davilaPanel.style.display = "none";
+        // davilaExpandBtn.innerHTML = "▼";
+        davilaExpandBtn.style.transform = "rotate(0deg)";
+      }
+    });
+  }
+
+  if (davilaInstallBtn) {
+    davilaInstallBtn.addEventListener("click", () => {
+       // Collect selected checkboxes
+       /** @type {string[]} */
+       const selected = [];
+       if (davilaCategoriesList) {
+         const checkboxes = davilaCategoriesList.querySelectorAll('input[type="checkbox"]');
+         checkboxes.forEach((/** @type {any} */ cb) => {
+           if (cb.checked) {
+              selected.push(cb.value);
+           }
+         });
+       }
+
+       // Allow empty selection (implies uninstall all)
+       
+       /** @type {HTMLButtonElement} */ (davilaInstallBtn).disabled = true;
+       vscode.postMessage({ command: "installDavila", categories: selected });
+
+       // Collapse panel per user request
+       if (davilaPanel && !davilaPanel.classList.contains("hidden")) {
+           davilaPanel.classList.add("hidden");
+           davilaPanel.style.display = "none";
+           if (davilaExpandBtn) {
+              davilaExpandBtn.style.transform = "rotate(0deg)";
+           }
+       }
+    });
+  }
+
+  // OLD Uninstall button removed
+
+
+  if (davilaSelectAllBtn) {
+    davilaSelectAllBtn.addEventListener("click", () => {
+        const checkboxes = davilaCategoriesList?.querySelectorAll('input[type="checkbox"]');
+        checkboxes?.forEach((/** @type {any} */ cb) => { cb.checked = true; });
+    });
+  }
+
+  if (davilaDeselectAllBtn) {
+    davilaDeselectAllBtn.addEventListener("click", () => {
+        const checkboxes = davilaCategoriesList?.querySelectorAll('input[type="checkbox"]');
+        checkboxes?.forEach((/** @type {any} */ cb) => { cb.checked = false; });
+    });
+  }
+
+  if (davilaUpdateBtn) {
+    davilaUpdateBtn.addEventListener("click", () => {
+      davilaUpdateBtn.disabled = true;
+      vscode.postMessage({ command: "updateDavila" });
+      setTimeout(() => { davilaUpdateBtn.disabled = false; }, 2000);
+    });
+  }
+
+  // Backend Message Handlers
+  window.addEventListener("message", (event) => {
+     const msg = event.data;
+     if (msg.command === "davilaStatus") {
+        updateDavilaUI(msg.installed, msg.text, msg.categories, msg.availableCategories);
+     } else if (msg.command === "davilaProgress") {
+       if (davilaStatus) {
+         davilaStatus.textContent = msg.text;
+         davilaStatus.className = "status-text info";
+         davilaStatus.classList.remove("hidden");
+       }
+     }
+  });
+
+  /**
+   * Update Davila UI
+   * @param {boolean} installed
+   * @param {string} text
+   * @param {string[]} installedCategories
+   * @param {string[]} availableCategories
+   */
+  function updateDavilaUI(installed, text, installedCategories, availableCategories) {
+     davilaCurrentInstalledCategories = installedCategories || [];
+     if (availableCategories) davilaAvailableCategories = availableCategories;
+
+     // Render Categories if list is empty or needs update
+     // We re-render to reflect installed state (checked checkboxes)
+     renderDavilaCategories();
+
+     if (davilaStatus && text) {
+        davilaStatus.textContent = text;
+        davilaStatus.className = "status-text " + (installed ? "success" : "info");
+        davilaStatus.classList.remove("hidden");
+        // Status clear timer
+        setTimeout(() => { if (davilaStatus) davilaStatus.classList.add("hidden"); }, 5000);
+     }
+
+     if (davilaInstallBtn) /** @type {HTMLButtonElement} */ (davilaInstallBtn).disabled = false;
+     
+     if (davilaUpdateBtn) {
+         davilaUpdateBtn.style.display = installed ? "flex" : "none";
+     }
+  }
+
+  function renderDavilaCategories() {
+    if (!davilaCategoriesList) return;
+    
+    // If we have no categories yet, show loading or empty
+    if (!davilaAvailableCategories || davilaAvailableCategories.length === 0) {
+       davilaCategoriesList.innerHTML = '<div class="loading">No categories loaded yet.</div>';
+       return;
+    }
+
+    // Don't wipe if we are just updating status? 
+    // Actually we want to preserve user selection if possible, OR sync with installed state?
+    // User expectation: If I already installed "Media", Media should be checked. 
+    // If I want to add "AI", I check AI. 
+    // So we should re-render based on installed state + potentially current DOM state?
+    // Let's simple re-render based on installed state + merge.
+    
+    // Save current selection state if re-rendering existing DOM
+    // For simplicity, we just rebuild.
+    davilaCategoriesList.innerHTML = "";
+    
+    davilaAvailableCategories.forEach(cat => {
+       const isInstalled = davilaCurrentInstalledCategories.includes(cat);
+       
+       const label = document.createElement("label");
+       label.className = "checkbox-item";
+       label.style.display = "flex";
+       label.style.alignItems = "center";
+       label.style.gap = "6px";
+       label.style.cursor = "pointer";
+
+       const input = document.createElement("input");
+       input.type = "checkbox";
+       input.value = cat;
+       input.checked = isInstalled;
+       
+       const span = document.createElement("span");
+       span.textContent = cat;
+       
+       label.appendChild(input);
+       label.appendChild(span);
+       
+       davilaCategoriesList.appendChild(label);
+    });
   }
 
   // --- Rendering Helpers ---

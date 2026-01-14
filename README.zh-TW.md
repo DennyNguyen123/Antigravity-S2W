@@ -3,21 +3,22 @@
 [English](README.md)
 
 > [!NOTE]
-> **更新於 2026-01-13**
+> **更新於 2026-01-14**
 >
-> - **Gemini CLI** 預覽版現已原生支援 Skills！前往 [google-gemini/gemini-cli](https://github.com/google-gemini/gemini-cli) 了解更多。
-> - **一鍵安裝 Superpowers** 為實驗性功能，正等待官方合併：[feat: Add Antigravity IDE integration](https://github.com/obra/superpowers/pull/192)。Bootstrap 指令會失敗，但本擴充套件會自動將 Superpowers 技能轉換為 Global Workflows，可透過 `/` 指令使用。
-
-![Antigravity-S2W Screenshot](resources/screenshot.jpg)
+> - **Gemini CLI** 已正式支援 Agent Skills！詳見 [v0.24.0 Release](https://github.com/google-gemini/gemini-cli/releases/tag/v0.24.0)。
 
 ## 系統需求
 
-> [!IMPORTANT]
-> 本擴充套件需要 **Google Antigravity IDE** 才能運作。
+本擴充套件需要 **Google Antigravity IDE** 才能運作。關於 Antigravity Skill 可參考
+[官方文檔](https://antigravity.google/docs/skills#example-a-code-review-skill)
+
+## 延伸模組截圖
+
+![Antigravity-S2W Screenshot](resources/screenshot.jpg)
 
 ## 功能特色
 
-將您安裝的 AI Skills 轉換為 Antigravity Global Workflow 檔案。整合來自不同 AI 工具的技能，在 Antigravity 中用 `/` 指令快速使用。
+將您安裝的 AI Skills 轉換為 Antigravity Global Workflow 檔案。整合來自不同 AI 工具的技能，在 Antigravity 中用 `/` 指令快速呼叫。
 
 ### 1. 工作流程生成器
 
@@ -31,12 +32,16 @@
 - **GitHub 下載**：直接從 GitHub 資料夾 URL 下載安裝
 - 支援 [Skills Marketplace](https://skillsmp.com) 技能包
 
-### 3. 技能來源開關
+### 3. 一鍵匯入技能 (OneKey Install)
 
-- **Superpowers**：一鍵安裝/移除 [obra/superpowers](https://github.com/obra/superpowers)
-- **Anthropic Skills**：一鍵安裝/移除 [anthropics/skills](https://github.com/anthropics/skills)
-- 安裝後自動產生對應的工作流程
-- 附帶更新按鈕以拉取最新變更
+提供簡易替代方式，直接從 Github 官方儲藏庫抓取技能：
+
+- **Superpowers**：一鍵安裝 [obra/superpowers](https://github.com/obra/superpowers) 技能
+- **Anthropic Skills**：一鍵安裝 [anthropics/skills](https://github.com/anthropics/skills) 技能
+- **Community Skills (Davila7)**：一鍵安裝 [davila7](https://github.com/davila7/claude-code-templates) 社群技能，支援複選多種主題分類。
+- **同步更新 (Sync & Apply)**：透過「Apply Changes」按鈕一次更新所有選取的分類及項目。
+- **手動更新 (Manual Update)**：點擊項目右側的 ↻ 圖示手動抓取 GitHub 最新版本。
+- **檔案目錄**：技能安裝至 `~/.gemini/antigravity/skills/`，維持原始目錄結構。
 
 ### 4. 工作流程管理器
 
@@ -44,27 +49,6 @@
 - 啟用/停用工作流程（`.md` ⇄ `.md.disable`）
 - 直接開啟並編輯工作流程檔案
 - 刪除工作流程及其對應的來源技能資料夾
-
-### 5. 自動設定
-
-- 首次啟動自動在 `~/.gemini/GEMINI.md` 加入「Available Skills」區塊
-- AI 代理會自動從信任目錄發現可用技能
-- **版本追蹤更新**：當延伸模組更新規則時，會自動替換舊版本區塊
-- 版本標記：`<!-- S2W_RULE_VERSION:1.1.0 -->`
-
-> [!IMPORTANT]
-> **關於手動修改的重要提醒**
->
-> - 為確保自動更新功能正常運作，請勿手動編輯 `GEMINI.md` 中的 `## Available Skills` 區塊
-> - 您可以在 `GEMINI.md` 的其他區塊增加或修改自訂規則（在 `## Available Skills` 之前，或之後加上新的 `## 您的章節` 標題以避免更新時被移除）
-> - 如果是從 v0.2.1 以前的舊版本升級，建議先手動移除舊的 `## Available Skills` 區塊，以確保新版本規則能正確套用
-
-**版本化機制說明：**
-
-- 首次安裝：附加規則並加上版本標記
-- 版本相同：不做任何變更
-- 新版本：自動替換舊規則為最新內容
-- 無版本標記（舊版）：視為 v0.0.0 並更新至目前版本
 
 ## 安裝方式
 
@@ -85,36 +69,20 @@
 | **生成工作流程** | 選擇技能來源 → 點擊「Generate Workflows」 |
 | **從 ZIP 匯入** | 點擊「Select ZIP Files...」→ 選擇 `.zip` 檔案 |
 | **從 GitHub 匯入** | 點擊「Import from URL...」→ 貼上 GitHub 資料夾網址 |
-| **開關技能來源** | 開啟 = 安裝，關閉 = 移除 |
+| **一鍵匯入技能** | 開啟/選取分類 → 點擊「Apply Changes」 |
+| **手動更新技能** | 點擊 ↻ 圖示直接抓取最新資料 |
 | **管理工作流程** | ⏻ 開關 · ✎ 編輯 · ✕ 刪除 |
 
 ## 檔案位置
 
 | 類型 | 路徑 |
 | ------ | ------ |
-| 技能來源 | `~/.gemini/skills/`、`~/.antigravity/anthropic-skills/skills/`、`~/.antigravity/superpowers/skills/` |
-| 產生的工作流程 | `~/.gemini/antigravity/global_workflows/` |
-| 全域規則 | `~/.gemini/GEMINI.md` |
-| Superpowers | `~/.antigravity/superpowers/` |
-| Anthropic Skills | `~/.antigravity/anthropic-skills/` |
-
-## 技能檔案格式
-
-技能定義在 `SKILL.md` 中，使用 YAML frontmatter：
-
-```markdown
----
-description: 此技能功能的簡短描述
----
-
-# 技能名稱
-
-詳細的文件說明與使用指南...
-```
+| 技能 | `~/.gemini/antigravity/skills/` |
+| 工作流程 | `~/.gemini/antigravity/global_workflows/` |
 
 ## 意見回饋與貢獻
 
-發現問題或有功能建議？歡迎 [開 Issue](../../issues) — 期待您的意見！
+發現問題、新功能建議、一鍵匯入更多Skills？都歡迎與我聯繫。期待您的意見！ [Open an issue](../../issues)
 
 ## 授權條款
 
@@ -122,6 +90,7 @@ MIT 授權 - 詳見 [LICENSE](LICENSE)
 
 ## 致謝
 
-- [jszip](https://github.com/Stuk/jszip) - ZIP 檔案處理（MIT）
-- [Superpowers](https://github.com/obra/superpowers) - AI 技能：腦力激盪與規劃
-- [Anthropic Skills](https://github.com/anthropics/skills) - Anthropic 官方 Claude 技能
+- [jszip](https://github.com/Stuk/jszip) by Stuk (MIT License)
+- [Superpowers](https://github.com/obra/superpowers) by obra (MIT License)
+- [Anthropic Skills](https://github.com/anthropics/skills) by Anthropic
+- [claude-code-templates](https://github.com/davila7/claude-code-templates/tree/main/cli-tool/components/skills) by davila7 (MIT License)

@@ -64,21 +64,65 @@ npx mocha "out/test/**/*.js" --grep "pattern"
 - VS Code API externalized as `vscode` in webpack.
 - ZIP handling uses `jszip`.
 
-## Project Layout
+## System Architecture & Data Flow
+
+This extension follows a **Model-View-Controller (MVC)** pattern:
+
+1. **View (Frontend)**: `webview/` (HTML/JS/CSS). Runs in an iframe.
+    - **Action**: User clicks button -> `vscode.postMessage({ command: 'install', ... })`
+    - **Update**: Listens for `window.addEventListener('message', ...)` to update DOM.
+
+2. **Controller (Backend)**: `SkillsViewProvider.ts`.
+    - **Action**: Receives commands via `webview.onDidReceiveMessage`.
+    - **Logic**: Dispatches to specific `Service` or `Installer`.
+    - **Feedback**: Sends data back via `_view.webview.postMessage({ command: 'status', ... })`.
+
+3. **Model (Services)**: `services/*.ts`.
+    - **Logic**: Handles file I/O, Git operations, and Workflow generation.
+    - **State**: Stateless mostly; relies on file system markers (`.davila-installed`, etc.).
+
+---
+
+## Project Layout & Responsibility
+
+### 1. Application Layer (Backend)
+
+| File | Responsibility |
+| :--- | :--- |
+| **`src/extension.ts`** | **Entry Point**. Registers `AntigravityS2W` command and activates `SkillsViewProvider`. |
+| **`src/SkillsViewProvider.ts`** | **Main Controller**. Handles all Webview messages, manages lifecycle, and orchestrates services. |
+
+### 2. Domain Services (Logic)
+
+| File | Responsibility |
+| :--- | :--- |
+| **`src/services/WorkflowGenerator.ts`** | **Core Business Logic**. Scans skill folders and converting them to `.md` workflows. |
+| **`src/services/PathManager.ts`** | **Configuration**. Single source of truth for `~/.gemini/antigravity/` paths. |
+| **`src/services/*Installer.ts`** | **OneKey Installers**. Handles Git operations (Clone/Sparse Checkout) for specific skill sources. |
+
+### 3. Presentation Layer (Frontend)
+
+| File | Responsibility |
+| :--- | :--- |
+| **`src/webview/index.html`** | **Structure**. Defines the layout: OneKey tables, Manager grid, Modals. |
+| **`src/webview/main.js`** | **Behavior**. Handles UI state, button clicks, and renders data received from Backend. |
+| **`src/webview/style.css`** | **Appearance**. Implements "Refined Utility" theme, Grid layouts, and VS Code theme integration. |
 
 ```txt
+# Quick Directory Reference
 src/
---extension.ts
---SkillsViewProvider.ts
---services/
-----PathManager.ts
-----WorkflowGenerator.ts
---webview/
-----index.html
-----main.js
-----style.css
-dist/        (webpack output)
-out/         (test build output)
+├── extension.ts
+├── SkillsViewProvider.ts
+├── services/
+│   ├── DavilaSkillsInstaller.ts
+│   ├── AnthropicSkillsInstaller.ts
+│   ├── SuperpowersInstaller.ts
+│   ├── WorkflowGenerator.ts
+│   └── PathManager.ts
+└── webview/
+    ├── index.html
+    ├── main.js
+    └── style.css
 ```
 
 ## Code Style Guidelines
@@ -144,15 +188,31 @@ out/         (test build output)
 
 ## Domain Notes
 
-### Skill Sources
+### Architecture Change (v0.3.0+)
 
-- Claude: `~/.claude/skills/`
-- Gemini: `~/.gemini/skills/`
-- Codex: `~/.codex/skills/`
+- **Layer 2 Operations**: The extension now operates directly on "Layer 2" skills (raw skill folders/files).
+- **No Conversion**: The "Layer 1" conversion logic (symlinks, `~/.antigravity/` intermediate folder) has been removed.
+- **Direct Download**: Skills are downloaded directly from GitHub to the target directory using Sparse Checkout.
+
+### Skill Sources & Paths
+
+- **Standard Path**: `~/.gemini/antigravity/skills/`
+- **Prefix Policy**: No vendor prefixes (e.g., `superpowers_` is removed). Skills are installed with their original directory names.
+
+### OneKey Install System
+
+- **Supported Sources**:
+  1. **Superpowers**: `obra/superpowers`
+  2. **Anthropic Skills**: `anthropics/skills`
+  3. **Community Skills (Davila7)**: `davila7/claude-code-templates` (Categorized)
+- **Sync Mechanism**:
+  - **Apply Changes**: Synchronizes selected categories (Install/Uninstall) in one batch.
+  - **Manual Update**: `↻` buttons trigger a re-download/update from GitHub. Auto-update on startup is disabled.
+- **UI Feedback**: Unified status reporting via `onekey-status` bar in the Webview.
 
 ### Output Location
 
-Generated workflows are written to:
+Generated workflows (`.md` files) are written to:
 
 - `~/.gemini/antigravity/global_workflows/`
 
