@@ -6,6 +6,8 @@ import { WorkflowGenerator } from "./services/WorkflowGenerator";
 import { SuperpowersInstaller } from "./services/SuperpowersInstaller";
 import { AnthropicSkillsInstaller } from "./services/AnthropicSkillsInstaller";
 import { DavilaSkillsInstaller } from "./services/DavilaSkillsInstaller";
+import { UiUxProMaxInstaller } from "./services/UiUxProMaxInstaller";
+import { GalleryProxyServer } from "./services/GalleryProxyServer";
 // Note: Installer logic can be simple enough to be inline or imported if we had a separate file.
 import * as JSZip from "jszip";
 import * as os from "os";
@@ -19,6 +21,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   private superpowersInstaller: SuperpowersInstaller;
   private anthropicInstaller: AnthropicSkillsInstaller;
   private davilaInstaller: DavilaSkillsInstaller;
+  private uiUxInstaller: UiUxProMaxInstaller;
 
   constructor(private readonly _extensionUri: vscode.Uri) {
     this.pathManager = new PathManager();
@@ -26,6 +29,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     this.superpowersInstaller = new SuperpowersInstaller();
     this.anthropicInstaller = new AnthropicSkillsInstaller();
     this.davilaInstaller = new DavilaSkillsInstaller();
+    this.uiUxInstaller = new UiUxProMaxInstaller();
   }
 
   public resolveWebviewView(
@@ -138,6 +142,17 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
            break;
         case "updateDavila":
            await this.handleUpdateDavila();
+           break;
+
+        // UI/UX Pro Max Handlers
+        case "installUiUxProMax":
+           await this.handleInstallUiUxProMax();
+           break;
+        case "openUiUxGallery":
+           this.handleOpenGallery();
+           break;
+        case "checkUiUxProMax":
+           this.sendUiUxProMaxStatus();
            break;
       }
     });
@@ -1180,4 +1195,144 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
        });
      }
   }
+
+  // --- UI/UX Pro Max ---
+
+  private async handleInstallUiUxProMax() {
+    try {
+      this._view?.webview.postMessage({
+        command: "uiUxProgress",
+        text: "Installing UI/UX Pro Max..."
+      });
+
+      await this.uiUxInstaller.install((step) => {
+        this._view?.webview.postMessage({
+          command: "uiUxProgress",
+          text: step
+        });
+      });
+
+      this.sendUiUxProMaxStatus();
+      this.sendWorkflowList();
+      vscode.window.showInformationMessage("UI/UX Pro Max Skill installed!");
+    } catch (e: any) {
+      this._view?.webview.postMessage({
+        command: "uiUxStatus",
+        installed: false,
+        text: `Installation failed: ${e.message}`
+      });
+      vscode.window.showErrorMessage(`UI/UX Pro Max installation failed: ${e.message}`);
+    }
+  }
+
+  private sendUiUxProMaxStatus() {
+    if (this._view) {
+      const installed = this.uiUxInstaller.isInstalled();
+      this._view.webview.postMessage({
+        command: "uiUxStatus",
+        installed: installed,
+        path: this.uiUxInstaller.getInstallPath()
+      });
+    }
+  }
+
+  private galleryProxy: GalleryProxyServer | null = null;
+
+  private async handleOpenGallery() {
+    
+    const panel = vscode.window.createWebviewPanel(
+      'uiUxGallery',
+      'UI/UX Gallery',
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true
+      }
+    );
+
+    // Initial Loading State
+    panel.webview.html = `<!DOCTYPE html>
+    <html lang="en">
+    <body style="background:#1a1a1a;color:#ccc;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">
+        <div style="text-align:center;">
+            <h2>Starting Local Proxy...</h2>
+            <p>Connecting to UI/UX Pro Max...</p>
+        </div>
+    </body>
+    </html>`;
+
+    // Handle messages (From Bridge)
+    panel.webview.onDidReceiveMessage(async (message) => {
+      if (message.command === 'copy') {
+        await vscode.env.clipboard.writeText(message.text);
+        vscode.window.showInformationMessage("Prompt copied to clipboard!");
+      } else if (message.command === 'error') {
+        // vscode.window.showErrorMessage("Gallery Error: " + message.text);
+        console.error("Gallery Webview Error:", message.text);
+      }
+    });
+
+    try {
+        // Start Proxy
+        if (!this.galleryProxy) {
+            this.galleryProxy = new GalleryProxyServer();
+        }
+        let port = this.galleryProxy.getPort();
+        if (port === 0) {
+             console.log("Starting Gallery Proxy Server...");
+             port = await this.galleryProxy.start();
+        }
+        
+        const targetUrl = `http://127.0.0.1:${port}/`;
+        console.log(`Gallery Proxy running at ${targetUrl}`);
+
+        // Set HTML (Parent Bridge)
+        // Iframe points to Localhost Proxy
+        panel.webview.html = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>UI/UX Gallery</title>
+                <style>
+                    body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #1a1a1a; }
+                    iframe { width: 100%; height: 100%; border: none; }
+                </style>
+            </head>
+            <body>
+                <iframe 
+                    src="${targetUrl}" 
+                    allow="clipboard-write"
+                ></iframe>
+                
+                <script>
+                    const vscode = acquireVsCodeApi();
+                    
+                    // Bridge: Listen for messages from Iframe Proxy
+                    window.addEventListener('message', (e) => {
+                         // Forward from Iframe to Extension
+                         if (e.data && e.data.command) {
+                             console.log("Bridge received:", e.data);
+                             vscode.postMessage(e.data);
+                         }
+                    });
+                </script>
+            </body>
+            </html>`;
+
+    } catch (e: any) {
+        vscode.window.showErrorMessage(`Failed to start gallery proxy: ${e.message}`);
+        panel.webview.html = `<html><body><h2>Error starting proxy</h2><p>${e.message}</p></body></html>`;
+    }
+    
+    // Cleanup on close
+    panel.onDidDispose(() => {
+        if (this.galleryProxy) {
+            this.galleryProxy.stop();
+            this.galleryProxy = null;
+        }
+    });
+  }
 }
+

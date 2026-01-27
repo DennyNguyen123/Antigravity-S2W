@@ -69,6 +69,7 @@
     "release": "standard-version"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.1",
     "@types/node": "20.2.5",
@@ -89,6 +90,8 @@
     "webpack-cli": "^5.1.1"
   },
   "dependencies": {
+    "express": "^5.2.1",
+    "http-proxy-middleware": "^3.0.5",
     "jszip": "^3.10.1"
   }
 }

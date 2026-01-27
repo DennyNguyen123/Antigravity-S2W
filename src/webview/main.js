@@ -42,6 +42,9 @@
   const workflowList = document.getElementById("workflow-list");
   /** @type {HTMLElement | null} */
   const refreshBtn = document.getElementById("refresh-btn");
+  // UI/UX Elements
+  const uiUxToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("uiux-toggle"));
+  const uiUxGalleryBtn = document.getElementById("uiux-gallery-btn");
   // OneKey elements
   /** @type {HTMLElement | null} */
   const onekeyStatus = document.getElementById("onekey-status");
@@ -195,6 +198,7 @@
   // Check installation status on init
   vscode.postMessage({ command: "checkSuperpowers" });
   vscode.postMessage({ command: "checkAnthropic" });
+  vscode.postMessage({ command: "checkUiUxProMax" });
 
   // 2. Generator Logic
   if (generateBtn && sourceSelect) {
@@ -285,6 +289,21 @@
     refreshBtn.addEventListener("click", () => {
       vscode.postMessage({ command: "refresh" });
     });
+  }
+
+  // 4a. UI/UX Logic
+  if (uiUxToggle) {
+    uiUxToggle.addEventListener("change", () => {
+       if (uiUxToggle.checked) {
+          uiUxToggle.disabled = true;
+          vscode.postMessage({ command: "installUiUxProMax" });
+       }
+    });
+  }
+  if (uiUxGalleryBtn) {
+     uiUxGalleryBtn.addEventListener("click", () => {
+         vscode.postMessage({ command: "openUiUxGallery" });
+     });
   }
 
   // 5. Superpowers Toggle Logic
@@ -484,6 +503,14 @@
          davilaStatus.className = "status-text info";
          davilaStatus.classList.remove("hidden");
        }
+     } else if (msg.command === "uiUxStatus") {
+        updateUiUxUI(msg.installed, msg.text);
+     } else if (msg.command === "uiUxProgress") {
+        if (davilaStatus) { // Reuse shared status element
+             davilaStatus.textContent = msg.text;
+             davilaStatus.className = "status-text info";
+             davilaStatus.classList.remove("hidden");
+        }
      }
   });
 
@@ -515,6 +542,24 @@
      if (davilaUpdateBtn) {
          davilaUpdateBtn.style.display = installed ? "flex" : "none";
      }
+  }
+
+  /**
+   * Update UI/UX Pro Max UI
+   * @param {boolean} installed
+   * @param {string} text
+   */
+  function updateUiUxUI(installed, text) {
+      if (uiUxToggle) {
+          uiUxToggle.checked = installed;
+          uiUxToggle.disabled = false;
+      }
+      if (davilaStatus && text) {
+          davilaStatus.textContent = text;
+          davilaStatus.className = "status-text " + (installed ? "success" : "info");
+          davilaStatus.classList.remove("hidden");
+          setTimeout(() => { if (davilaStatus) davilaStatus.classList.add("hidden"); }, 5000);
+      }
   }
 
   function renderDavilaCategories() {
@@ -930,4 +975,5 @@
     }
     return path;
   }
+
 })();
