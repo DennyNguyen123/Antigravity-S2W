@@ -94,3 +94,4 @@ MIT 授權 - 詳見 [LICENSE](LICENSE)
 - [Superpowers](https://github.com/obra/superpowers) by obra (MIT License)
 - [Anthropic Skills](https://github.com/anthropics/skills) by Anthropic
 - [claude-code-templates](https://github.com/davila7/claude-code-templates/tree/main/cli-tool/components/skills) by davila7 (MIT License)
+- [UI/UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) - 專業設計智慧與圖庫支援

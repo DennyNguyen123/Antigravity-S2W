@@ -91,3 +91,4 @@ MIT License - See [LICENSE](LICENSE) for details.
 - [Superpowers](https://github.com/obra/superpowers) - AI skills for brainstorming & planning
 - [Anthropic Skills](https://github.com/anthropics/skills) - Official Claude skills
 - [claude-code-templates](https://github.com/davila7/claude-code-templates/tree/main/cli-tool/components/skills) by davila7 (MIT License)
+- [UI/UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) - Professional design intelligence & gallery
