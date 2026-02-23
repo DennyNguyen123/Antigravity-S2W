@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- CSP will be injected dynamically -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Antigravity S2W</title>
     <link href="style.css" rel="stylesheet" />
@@ -37,30 +38,43 @@
         <div id="generation-status" class="status-text hidden"></div>
       </section>
 
+      <!-- Smart Search Section -->
+      <section class="card search-card">
+        <h3>Search Skills (CLI)</h3>
+        <p class="hint-text" style="margin-top:0; margin-bottom:10px;">Search and install skills directly from the terminal registry.</p>
+        <div class="search-box" style="display: flex; gap: 8px;">
+            <input type="text" id="cli-search-input" placeholder="e.g. react, python, debug" style="flex: 1; min-width: 0;" />
+            <button id="cli-search-btn" class="btn btn-primary" style="width: auto; white-space: nowrap;">Search</button>
+        </div>
+        <div id="cli-search-results" class="search-results hidden" style="margin-top: 10px; max-height: 300px; overflow-y: auto;"></div>
+      </section>
+
       <!-- Installer Section -->
       <section class="card installer-card">
-        <h3>Import Skill Files to Workflow</h3>
-        <button id="install-btn" class="btn btn-primary">
-          <span class="icon">📦</span> Select ZIP Files...
-        </button>
-        <div style="height: 8px"></div>
-        <button id="download-url-btn" class="btn btn-secondary">
-          <span class="icon">🌐</span> Import from Github URL...
-        </button>
+        <h3>Manual Install</h3>
+        
+        <div style="display:flex; gap:8px;">
+            <button id="install-btn" class="btn btn-primary" style="flex:1;">
+            <span class="icon">📦</span> Select ZIP...
+            </button>
+            <button id="download-url-btn" class="btn btn-secondary" style="flex:1;">
+            <span class="icon">🌐</span> Github URL...
+            </button>
+        </div>
 
         <!-- URL Input Container -->
         <div
           id="url-input-container"
           class="url-input-group hidden"
-          style="display: none"
+          style="display: none; margin-top: 10px;"
         >
           <input
             type="text"
             id="url-input"
-            placeholder="https://github.com/owner/repo/tree/branch/path"
+            placeholder="https://github.com/owner/repo..."
           />
           <button id="confirm-download-btn" class="btn btn-primary">
-            Download and Import
+            Download
           </button>
         </div>
 
@@ -85,16 +99,19 @@
             <div class="col-desc">Advanced custom skills & tools</div>
             <div class="col-action">
               <button
+                id="superpowers-toggle-btn"
+                class="btn-icon-ghost toggle-power-btn"
+                title="Enable/Disable Superpowers"
+              >
+                ⏻
+              </button>
+              <button
                 id="superpowers-update-btn"
                 class="btn-icon-ghost"
                 title="Update Superpowers"
               >
                 ↻
               </button>
-              <label class="toggle-switch">
-                <input type="checkbox" id="superpowers-toggle" />
-                <span class="toggle-slider"></span>
-              </label>
             </div>
           </li>
 
@@ -104,16 +121,19 @@
             <div class="col-desc">Pre-built AI capabilities & prompts</div>
             <div class="col-action">
               <button
+                id="anthropic-toggle-btn"
+                class="btn-icon-ghost toggle-power-btn"
+                title="Enable/Disable Anthropic Skills"
+              >
+                ⏻
+              </button>
+              <button
                 id="anthropic-update-btn"
                 class="btn-icon-ghost"
                 title="Update Anthropic Skills"
               >
                 ↻
               </button>
-              <label class="toggle-switch">
-                <input type="checkbox" id="anthropic-toggle" />
-                <span class="toggle-slider"></span>
-              </label>
             </div>
           </li>
 
@@ -122,6 +142,13 @@
             <div class="col-name">Community Skills (Davila7)</div>
             <div class="col-desc">Massive collection of categorized skills</div>
             <div class="col-action">
+              <button
+                id="davila-install-btn-power" 
+                class="btn-icon-ghost toggle-power-btn" 
+                title="Manage Community Skills"
+              >
+                ⏻ 
+              </button>
               <button
                 id="davila-update-btn"
                 class="btn-icon-ghost"
@@ -145,17 +172,19 @@
             <div class="col-desc">Professional Design Intelligence & Gallery</div>
             <div class="col-action">
               <button
+                id="uiux-toggle-btn"
+                class="btn-icon-ghost toggle-power-btn"
+                title="Enable/Disable UI/UX Pro Max"
+              >
+                ⏻
+              </button>
+              <button
                 id="uiux-gallery-btn"
                 class="btn-icon-ghost"
                 title="Open Design Gallery"
-                style="margin-right: 4px;"
               >
                 🌐
               </button>
-              <label class="toggle-switch">
-                <input type="checkbox" id="uiux-toggle" />
-                <span class="toggle-slider"></span>
-              </label>
             </div>
           </li>
 
@@ -214,6 +243,13 @@
           <!-- Items will be injected here via JS -->
           <li class="empty-state">No workflows found.</li>
         </ul>
+        
+        <!-- Pagination Controls -->
+        <div class="pagination-controls" id="pagination-controls" style="display: none; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 8px;">
+            <button id="prev-page-btn" class="btn-icon-ghost" disabled>◀</button>
+            <span id="page-info" style="font-size: 11px; color: var(--text-secondary);">Page 1</span>
+            <button id="next-page-btn" class="btn-icon-ghost" disabled>▶</button>
+        </div>
       </section>
     </div>
 

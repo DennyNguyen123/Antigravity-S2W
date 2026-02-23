@@ -8,9 +8,11 @@ import { AnthropicSkillsInstaller } from "./services/AnthropicSkillsInstaller";
 import { DavilaSkillsInstaller } from "./services/DavilaSkillsInstaller";
 import { UiUxProMaxInstaller } from "./services/UiUxProMaxInstaller";
 import { GalleryProxyServer } from "./services/GalleryProxyServer";
+import { SkillsMpProxyServer } from "./services/SkillsMpProxyServer";
 // Note: Installer logic can be simple enough to be inline or imported if we had a separate file.
 import * as JSZip from "jszip";
 import * as os from "os";
+import * as cp from "child_process"; // Added for CLI
 
 export class SkillsViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = "antigravityInstructions";
@@ -153,6 +155,20 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
            break;
         case "checkUiUxProMax":
            this.sendUiUxProMaxStatus();
+           break;
+
+        case "openSkillsMp":
+           this.handleOpenSkillsMp();
+           break;
+
+        case "searchSkills":
+           this.handleSearchSkills(data.query);
+           break;
+        case "installFromCli":
+           this.handleInstallFromCli(data.repo);
+           break;
+        case "openExternal":
+           if (data.url) vscode.env.openExternal(vscode.Uri.parse(data.url));
            break;
       }
     });
@@ -313,20 +329,26 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
               const data: any[] = [];
               res.on('data', (chunk: any) => data.push(chunk));
               res.on('end', () => resolve(Buffer.concat(data).toString()));
-          }).on('error', (err: any) => reject(err));
+           }).on('error', (err: any) => reject(err));
       });
   }
 
   public sendInitData() {
-    if (this._view) {
-      const sources = this.pathManager.getAvailableSources();
-      const workflows = this.getExistingWorkflows();
-      this._view.webview.postMessage({
-        command: "init",
-        locale: vscode.env.language,
-        sources: sources,
-        workflows: workflows,
-      });
+    try {
+      if (this._view) {
+        const sources = this.pathManager.getAvailableSources();
+        const workflows = this.getExistingWorkflows();
+        this._view.webview.postMessage({
+          command: "init",
+          locale: vscode.env.language,
+          sources: sources,
+          workflows: workflows,
+        });
+      }
+    } catch (e: any) {
+        console.error("sendInitData Failed:", e);
+        this._view?.webview.postMessage({ command: "status", type: "error", text: `Init Failed: ${e.message}` });
+        vscode.window.showErrorMessage(`Extension Init Failed: ${e.message}`);
     }
   }
 
@@ -1055,26 +1077,51 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-    const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "src", "webview", "main.js")
-    );
-    const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, "src", "webview", "style.css")
-    );
+    // Load file contents
+    const htmlPath = path.join(this._extensionUri.fsPath,"src","webview","index.html");
+    const jsPath = path.join(this._extensionUri.fsPath,"src","webview","main.js");
+    const cssPath = path.join(this._extensionUri.fsPath,"src","webview","style.css");
 
-    // Load index.html content
-    const htmlPath = path.join(
-      this._extensionUri.fsPath,
-      "src",
-      "webview",
-      "index.html"
-    );
     let htmlContent = fs.readFileSync(htmlPath, "utf8");
+    const jsContent = fs.readFileSync(jsPath, "utf8");
+    const cssContent = fs.readFileSync(cssPath, "utf8");
 
-    // Inject URIs
-    htmlContent = htmlContent.replace("style.css", styleUri.toString());
-    htmlContent = htmlContent.replace("main.js", scriptUri.toString());
+    // Inline CSS
+    const styleTag = `<style>\n${cssContent}\n</style>`;
+    if (htmlContent.includes('<link href="style.css" rel="stylesheet" />')) {
+        htmlContent = htmlContent.replace('<link href="style.css" rel="stylesheet" />', styleTag);
+    } else {
+        // Fallback: Inject into head
+        htmlContent = htmlContent.replace('</head>', `${styleTag}\n</head>`);
+    }
+    
+    // Inline JS
+    const scriptTag = `<script>\n${jsContent}\n</script>`;
+    if (htmlContent.includes('<script src="main.js"></script>')) {
+        htmlContent = htmlContent.replace('<script src="main.js"></script>', scriptTag);
+    } else {
+        // Fallback: Inject at end of body
+        htmlContent = htmlContent.replace('</body>', `${scriptTag}\n</body>`);
+    }
+
+
+
+    // Generate and Inject CSP
+
+
+
+    // Generate and Inject CSP
+    const nonce = 'antigravity-' + Date.now(); // Simple nonce (or just use unsafe-inline which user context likely needs)
+    // Note: For simplicity and compatibility with existing inline styles/scripts, we use unsafe-inline mostly.
+    // Important: we must include webview.cspSource to allow loading resources from the extension/webview origin
+    const csp = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} https: data:; font-src ${webview.cspSource};">`;
+    
+    // Inject CSP into head
+    htmlContent = htmlContent.replace('<!-- CSP will be injected dynamically -->', csp);
+    // Fallback if placeholder missing (legacy check)
+    if (!htmlContent.includes(csp) && htmlContent.includes('<head>')) {
+         htmlContent = htmlContent.replace('<head>', `<head>${csp}`);
+    }
 
     // Inject Compatibility Warning
     const warningHtml = this._getWarningHtml();
@@ -1333,6 +1380,288 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
             this.galleryProxy = null;
         }
     });
+  }
+
+  private skillsMpProxy: SkillsMpProxyServer | null = null;
+
+  private async handleOpenSkillsMp() {
+    // Create specific panel for SkillsMP
+    const panel = vscode.window.createWebviewPanel(
+      'skillsMpBrowser',
+      'Skills Marketplace',
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true,
+        retainContextWhenHidden: true
+      }
+    );
+
+    // Initial Loading Interface
+    const loadingHtml = `<!DOCTYPE html>
+    <html lang="en">
+    <body style="background:#1a1a1a;color:#ccc;display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;">
+        <div style="text-align:center;">
+            <h2>Connecting to SkillsMP...</h2>
+            <p>Setting up secure proxy...</p>
+        </div>
+    </body>
+    </html>`;
+    panel.webview.html = loadingHtml;
+
+    // Handle messages from the Webview (including fallback page)
+    panel.webview.onDidReceiveMessage(async (message) => {
+        if (message.command === 'openExternal') {
+             if (message.url) {
+                 await vscode.env.openExternal(vscode.Uri.parse(message.url));
+             }
+        }
+    });
+
+    try {
+        if (!this.skillsMpProxy) {
+            this.skillsMpProxy = new SkillsMpProxyServer();
+            
+            // Set up ZIP listener
+            this.skillsMpProxy.onZipDownloaded = async (zipPath) => {
+                // Determine skill name - timestamped default
+                // Ideally we parse it from the URL or Headers, but temp file is skill-timestamp.zip
+                // Let's rely on handleInstall's capability or processZip's capability
+                
+                vscode.window.showInformationMessage("Skill ZIP captured! Installing...");
+                
+                try {
+                     // We use the existing logic which takes an array of paths
+                     await this.handleInstall([zipPath]);
+                     
+                     // Notify that it worked
+                     vscode.window.showInformationMessage("Skill installed successfully!");
+                } catch (e: any) {
+                     vscode.window.showErrorMessage(`Failed to install intercepted skill: ${e.message}`);
+                } finally {
+                    // Start Cleanup of temp file? handleInstall doesn't move it, it reads it.
+                    // So we should delete it after.
+                    try { fs.unlinkSync(zipPath); } catch {}
+                }
+            };
+        }
+
+        let port = this.skillsMpProxy.getPort();
+        if (port === 0) {
+             port = await this.skillsMpProxy.start();
+        }
+
+        const targetUrl = `http://127.0.0.1:${port}/`;
+        console.log(`SkillsMP Proxy running at ${targetUrl}`);
+
+        panel.webview.html = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Skills Marketplace</title>
+                <style>
+                    body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background-color: #1a1a1a; }
+                    iframe { width: 100%; height: 100%; border: none; }
+                </style>
+            </head>
+            <body>
+                <iframe 
+                    src="${targetUrl}" 
+                    allow="clipboard-write"
+                ></iframe>
+                <script>
+                    const vscode = acquireVsCodeApi();
+                    window.addEventListener('message', (e) => {
+                         // Forward messages from Iframe (Fallback Page) to Extension Host
+                         if (e.data && e.data.command === 'openExternal') {
+                             vscode.postMessage(e.data);
+                         }
+                    });
+                </script>
+            </body>
+            </html>`;
+
+    } catch (e: any) {
+        vscode.window.showErrorMessage(`Failed to start SkillsMP proxy: ${e.message}`);
+        panel.dispose();
+    }
+
+    // Note: We don't stop the proxy immediately on dispose because user might reopen.
+    // Ideally we stop it when extension deactivates or user explicit stop command.
+    // Or we rely on lazy restart.
+    panel.onDidDispose(() => {
+        // Optional: Stop proxy to save resources
+        // if (this.skillsMpProxy) { this.skillsMpProxy.stop(); this.skillsMpProxy = null; }
+    });
+  }
+
+  // --- CLI Integration ---
+  
+  private async handleSearchSkills(query: string) {
+      if (!query) return;
+
+      try {
+          // Run npx skills find query
+          // We need to parse output.
+          // Output format example:
+          /*
+            vercel-labs/agent-skills@vercel-react-best-practices
+            └ https://skills.sh/vercel-labs/agent-skills/vercel-react-best-practices
+          */
+          
+          const output = await this.runNpxCommand(`npx skills find "${query}"`);
+          console.log('[DEBUG] Raw CLI Output:', JSON.stringify(output)); // Debug log for user to see in dev tools
+          
+          // Strip ANSI codes and carriage returns
+          const cleanOutput = output.replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+          
+          console.log('[DEBUG] Clean Output Lines:', cleanOutput.split('\n'));
+
+          const lines = cleanOutput.split('\n');
+          const results: any[] = [];
+          
+          // Regex to match "owner/repo@skill" OR just "owner/repo"
+          for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed) continue;
+              // Skip known non-result lines
+              if (trimmed.startsWith('└') || trimmed.startsWith('Run') || trimmed.startsWith('Install') || trimmed.startsWith('Discover') || trimmed.startsWith('Usage')) continue;
+              if (trimmed.startsWith('http')) continue; // Skip URL lines if they are on their own
+
+              // Match pattern: something/something@something
+              if (trimmed.includes('@') && trimmed.includes('/')) {
+                  // Format: owner/repo@skill
+                  const parts = trimmed.split('@');
+                  if (parts.length >= 2) {
+                      const repo = parts[0].trim(); // owner/repo
+                      const skill = parts[1].trim(); // skillname
+                      
+                      // Enhance: Create a friendly name/description
+                      const friendlyName = skill.replace(/-/g, ' ').replace(/_/g, ' ');
+                      // Capitalize
+                      const title = friendlyName.replace(/\b\w/g, l => l.toUpperCase());
+
+                      results.push({
+                          repo: repo, 
+                          skill: skill,
+                          title: title, 
+                          description: `Skill from ${repo}` 
+                      });
+                  }
+              }
+          }
+          
+          // Limit results
+          const limited = results.slice(0, 50);
+
+          if (limited.length === 0) {
+              // DEBUG: If no results found, send the raw output to webview for inspection
+              this._view?.webview.postMessage({
+                  command: "searchError",
+                  error: `No results parsed. Raw output excerpt: ${cleanOutput.substring(0, 200)}...`
+              });
+              return;
+          }
+
+          this._view?.webview.postMessage({
+              command: "searchResults",
+              results: limited
+          });
+
+      } catch (e: any) {
+          this._view?.webview.postMessage({
+              command: "searchError",
+              error: e.message
+          });
+      }
+  }
+
+  private async handleInstallFromCli(repo: string) {
+      if (!repo) return;
+
+      try {
+           this._view?.webview.postMessage({ command: "status", type: "info", text: `Invoking CLI to install ${repo}...` });
+           
+           // Create Temp Dir
+           const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'antigravity-cli-'));
+           
+           // Run Install
+           // npx skills add owner/repo --yes
+           // We run in tempDir so it creates .agents/skills there
+           await this.runNpxCommand(`npx skills add ${repo} --yes`, tempDir);
+           
+           // Scan for .agents/skills
+           const generatedSkillsDir = path.join(tempDir, '.agents', 'skills');
+           
+           if (!fs.existsSync(generatedSkillsDir)) {
+               throw new Error("CLI finished but no .agents/skills folder found.");
+           }
+           
+           // Move Skills to Antigravity Skills Path
+           const targetBaseDir = this.pathManager.getSkillsPath();
+           if (!fs.existsSync(targetBaseDir)) fs.mkdirSync(targetBaseDir, { recursive: true });
+
+           const skills = fs.readdirSync(generatedSkillsDir);
+           let count = 0;
+           
+           for (const skill of skills) {
+               const src = path.join(generatedSkillsDir, skill);
+               const dest = path.join(targetBaseDir, skill);
+               
+               // Force Move/Copy
+               if (fs.existsSync(dest)) fs.rmSync(dest, { recursive: true, force: true });
+               
+               // Rename if possible (same drive), else copy
+               try {
+                   fs.renameSync(src, dest);
+               } catch {
+                   fs.cpSync(src, dest, { recursive: true });
+               }
+               count++;
+           }
+           
+           // Cleanup
+           try { fs.rmSync(tempDir, { recursive: true, force: true }); } catch {}
+           
+           if (count > 0) {
+               // Generate Workflows
+               await this.workflowGenerator.generate(targetBaseDir, this.pathManager.getDestinationPath());
+               this.sendWorkflowList();
+               
+               this._view?.webview.postMessage({ command: "status", type: "success", text: `Installed ${count} skills from CLI!` });
+               vscode.window.showInformationMessage(`Successfully installed ${count} skills from ${repo}`);
+           } else {
+               throw new Error("No skills found in package.");
+           }
+
+      } catch (e: any) {
+           console.error("CLI Install Error", e);
+           this._view?.webview.postMessage({ command: "status", type: "error", text: `CLI Install Failed: ${e.message}` });
+           vscode.window.showErrorMessage(`CLI Install Failed: ${e.message}`);
+      }
+  }
+  
+  private runNpxCommand(command: string, cwd?: string): Promise<string> {
+      return new Promise((resolve, reject) => {
+          cp.exec(command, { cwd: cwd || this._extensionUri.fsPath }, (err, stdout, stderr) => {
+               // Note: npx might exit 1 if some warnings, but output is there.
+               // skills find exits 0 usually.
+               if (err) {
+                   // If stderr has info, reject with it
+                   // reject(err);
+                   // Sometimes npx has non-fatal errors?
+                   // Consider checking stdout too.
+                   if (stdout && command.includes('find')) {
+                       resolve(stdout);
+                       return;
+                   }
+                   reject(new Error(stderr || err.message));
+                   return;
+               }
+               resolve(stdout);
+          });
+      });
   }
 }
 

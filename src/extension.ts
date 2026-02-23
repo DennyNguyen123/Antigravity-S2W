@@ -22,6 +22,13 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	context.subscriptions.push(
+		vscode.commands.registerCommand('antigravity.getChromeDevtoolsMcpUrl', () => {
+			console.log('[Antigravity] getChromeDevtoolsMcpUrl called');
+			return undefined; 
+		})
+	);
+
 	// Auto-update disabled per user request
 	// autoUpdateSkills();
 }

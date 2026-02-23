@@ -3,7 +3,11 @@
 (function () {
   // Acquire VS Code API
   // @ts-ignore
-  const vscode = acquireVsCodeApi();
+  // Acquire VS Code API (or reuse if already acquired by debug script)
+  // @ts-ignore
+  const vscode = window.vscode || acquireVsCodeApi();
+  // @ts-ignore
+  if (!window.vscode) window.vscode = vscode; // Ensure it's global for others
 
   // Global Error Safety
   window.onerror = function (message, source, lineno, colno, error) {
@@ -13,7 +17,8 @@
     });
   };
 
-  // vscode.postMessage({ command: 'debug', message: 'Main.js Execution Started' });
+  console.log("[DEBUG] Main.js Execution Started");
+  vscode.postMessage({ command: 'debug', message: 'Main.js Execution Started' });
 
   // DOM Elements
   /** @type {HTMLSelectElement | null} */
@@ -43,32 +48,45 @@
   /** @type {HTMLElement | null} */
   const refreshBtn = document.getElementById("refresh-btn");
   // UI/UX Elements
-  const uiUxToggle = /** @type {HTMLInputElement | null} */ (document.getElementById("uiux-toggle"));
+  const uiUxToggleBtn = document.getElementById("uiux-toggle-btn"); // Changed to Btn
   const uiUxGalleryBtn = document.getElementById("uiux-gallery-btn");
   // OneKey elements
   /** @type {HTMLElement | null} */
   const onekeyStatus = document.getElementById("onekey-status");
-  /** @type {HTMLInputElement | null} */
-  const superpowersToggle = /** @type {any} */ (
-    document.getElementById("superpowers-toggle")
+  /** @type {HTMLButtonElement | null} */
+  const superpowersToggleBtn = /** @type {any} */ (
+    document.getElementById("superpowers-toggle-btn")
   );
   /** @type {HTMLButtonElement | null} */
   const superpowersUpdateBtn = /** @type {any} */ (
     document.getElementById("superpowers-update-btn")
   );
-  /** @type {HTMLInputElement | null} */
-  const anthropicToggle = /** @type {any} */ (
-    document.getElementById("anthropic-toggle")
+  /** @type {HTMLButtonElement | null} */
+  const anthropicToggleBtn = /** @type {any} */ (
+    document.getElementById("anthropic-toggle-btn")
   );
   /** @type {HTMLButtonElement | null} */
   const anthropicUpdateBtn = /** @type {any} */ (
     document.getElementById("anthropic-update-btn")
   );
+  /** @type {HTMLButtonElement | null} */
+  const davilaInstallBtnPower = document.getElementById("davila-install-btn-power");
+
+  // Pagination Elements
+  const prevPageBtn = document.getElementById("prev-page-btn");
+  const nextPageBtn = document.getElementById("next-page-btn");
+  const pageInfo = document.getElementById("page-info");
 
   // State
   let locale = "en"; // Default
   /** @type {Array<any>} */
   let sources = [];
+  
+  // Pagination State
+  const ITEMS_PER_PAGE = 10;
+  let currentPage = 1;
+  /** @type {Array<any>} */
+  let currentWorkflows = [];
 
   // --- Message Handling ---
   /** @type {any} */
@@ -233,6 +251,13 @@
     });
   }
 
+  const browseSkillsMpBtn = document.getElementById("browse-skillsmp-btn");
+  if (browseSkillsMpBtn) {
+    browseSkillsMpBtn.addEventListener("click", () => {
+      vscode.postMessage({ command: "openSkillsMp" });
+    });
+  }
+
   if (downloadUrlBtn) {
     downloadUrlBtn.addEventListener("click", () => {
       // Toggle Input Container
@@ -292,12 +317,23 @@
   }
 
   // 4a. UI/UX Logic
-  if (uiUxToggle) {
-    uiUxToggle.addEventListener("change", () => {
-       if (uiUxToggle.checked) {
-          uiUxToggle.disabled = true;
-          vscode.postMessage({ command: "installUiUxProMax" });
-       }
+  if (uiUxToggleBtn) {
+    uiUxToggleBtn.addEventListener("click", () => {
+        const isActive = uiUxToggleBtn.classList.contains("active");
+        if (!isActive) { // Install if not active
+            uiUxToggleBtn.disabled = true;
+            vscode.postMessage({ command: "installUiUxProMax" });
+        } else {
+             // Optional: Uninstall/Disable logic if backend supports it?
+             // Since backend only has "installUiUxProMax", we might assume it's one-way or user wants to re-trigger?
+             // If it's a "toggle", we need a disable command. 
+             // Looking at existing code, it was only "if (checked) install". Unchecking did nothing?
+             // User wants "Enable/Disable". If backend doesn't support disable, this might be visual only or a no-op.
+             // I'll send a toggle command if possible, or just re-install/update.
+             // Actually, the previous code only acted on "checked".
+             // Let's assume for now clicking it again might check for updates or be a no-op.
+             // I'll leave it as "Install if not active". 
+        }
     });
   }
   if (uiUxGalleryBtn) {
@@ -307,11 +343,12 @@
   }
 
   // 5. Superpowers Toggle Logic
-  if (superpowersToggle) {
-    superpowersToggle.addEventListener("change", () => {
-      const enabled = superpowersToggle.checked;
-      superpowersToggle.disabled = true; // Prevent rapid toggling
-      vscode.postMessage({ command: "toggleSuperpowers", enabled: enabled });
+  if (superpowersToggleBtn) {
+    superpowersToggleBtn.addEventListener("click", () => {
+      const isActive = superpowersToggleBtn.classList.contains("active");
+      const newState = !isActive;
+      superpowersToggleBtn.disabled = true; 
+      vscode.postMessage({ command: "toggleSuperpowers", enabled: newState });
     });
   }
 
@@ -321,16 +358,19 @@
    * @param {string} [text]
    */
   function updateSuperpowersUI(installed, text) {
-    if (superpowersToggle) {
-      superpowersToggle.checked = installed;
-      superpowersToggle.disabled = false;
+    if (superpowersToggleBtn) {
+      if (installed) {
+          superpowersToggleBtn.classList.add("active");
+      } else {
+          superpowersToggleBtn.classList.remove("active");
+      }
+      superpowersToggleBtn.disabled = false;
     }
     if (onekeyStatus && text) {
       onekeyStatus.textContent = text;
       onekeyStatus.className =
         "status-text " + (installed ? "success" : "info");
       onekeyStatus.classList.remove("hidden");
-      // Auto-hide after 10 seconds
       setTimeout(() => {
         if (onekeyStatus) onekeyStatus.classList.add("hidden");
       }, 10000);
@@ -353,11 +393,12 @@
   }
 
   // 7. Anthropic Toggle Logic
-  if (anthropicToggle) {
-    anthropicToggle.addEventListener("change", () => {
-      const enabled = anthropicToggle.checked;
-      anthropicToggle.disabled = true;
-      vscode.postMessage({ command: "toggleAnthropic", enabled: enabled });
+  if (anthropicToggleBtn) {
+    anthropicToggleBtn.addEventListener("click", () => {
+      const isActive = anthropicToggleBtn.classList.contains("active");
+      const newState = !isActive;
+      anthropicToggleBtn.disabled = true;
+      vscode.postMessage({ command: "toggleAnthropic", enabled: newState });
     });
   }
 
@@ -378,9 +419,13 @@
    * @param {string} [text]
    */
   function updateAnthropicUI(installed, text) {
-    if (anthropicToggle) {
-      anthropicToggle.checked = installed;
-      anthropicToggle.disabled = false;
+    if (anthropicToggleBtn) {
+      if (installed) {
+          anthropicToggleBtn.classList.add("active");
+      } else {
+          anthropicToggleBtn.classList.remove("active");
+      }
+      anthropicToggleBtn.disabled = false;
     }
     if (onekeyStatus && text) {
       onekeyStatus.textContent = text;
@@ -550,9 +595,13 @@
    * @param {string} text
    */
   function updateUiUxUI(installed, text) {
-      if (uiUxToggle) {
-          uiUxToggle.checked = installed;
-          uiUxToggle.disabled = false;
+      if (uiUxToggleBtn) {
+          if (installed) {
+              uiUxToggleBtn.classList.add("active");
+          } else {
+              uiUxToggleBtn.classList.remove("active");
+          }
+          uiUxToggleBtn.disabled = false;
       }
       if (davilaStatus && text) {
           davilaStatus.textContent = text;
@@ -560,6 +609,129 @@
           davilaStatus.classList.remove("hidden");
           setTimeout(() => { if (davilaStatus) davilaStatus.classList.add("hidden"); }, 5000);
       }
+  }
+
+
+  
+  // --- CLI Search Logic ---
+  // const cliSearchBtn = ... (removed)
+  const cliSearchInput = document.getElementById("cli-search-input");
+  const cliSearchTrigger = document.getElementById("cli-search-btn");
+  const cliSearchResults = document.getElementById("cli-search-results");
+
+  if (cliSearchTrigger && cliSearchInput) {
+      const doSearch = () => {
+          // @ts-ignore
+          const query = cliSearchInput.value.trim();
+          if (!query) return;
+          
+          if (cliSearchResults) {
+              cliSearchResults.innerHTML = '<div class="loading">Searching via CLI...</div>';
+              cliSearchResults.classList.remove("hidden");
+          }
+          vscode.postMessage({ command: "searchSkills", query });
+      };
+
+      cliSearchTrigger.addEventListener("click", doSearch);
+      cliSearchInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") doSearch();
+      });
+  }
+
+  // Handle Search Results via Message
+  window.addEventListener("message", (event) => {
+      const msg = event.data;
+      if (msg.command === "searchResults") {
+          renderSearchResults(msg.results);
+      } else if (msg.command === "searchError") {
+          if (cliSearchResults) {
+              cliSearchResults.innerHTML = `<div class="error">Search failed: ${msg.error}</div>`;
+          }
+      }
+  });
+
+  /**
+   * @param {any[]} results
+   */
+  function renderSearchResults(results) {
+      console.log("[DEBUG] Rendering Results:", results); // Frontend log
+      if (!cliSearchResults) return;
+      cliSearchResults.innerHTML = "";
+      cliSearchResults.classList.remove("hidden");
+      // Add grid class if not present (handled by CSS on container ID, but safe to check)
+      cliSearchResults.className = "search-results"; 
+
+      if (!results || results.length === 0) {
+          cliSearchResults.innerHTML = '<div style="grid-column: 1 / -1; padding: 20px; text-align: center; opacity: 0.7;">No results found.</div>';
+          return;
+      }
+
+      results.forEach((/** @type {any} */ item) => {
+          const div = document.createElement("div");
+          div.className = "search-item";
+          // Inline styles removed in favor of CSS classes
+
+          const displayName = item.title || item.skill;
+          const displayDesc = item.description || item.repo;
+          
+          div.innerHTML = `
+            <div class="search-item-header">
+                <div class="search-item-title" title="${displayName}">${displayName}</div>
+            </div>
+            <div class="search-item-desc" title="${displayDesc}">${displayDesc}</div>
+          `;
+          
+          const btn = document.createElement("button");
+          btn.className = "btn-sm btn-primary";
+          btn.style.marginTop = "auto"; // Push to bottom
+          btn.textContent = "Install";
+          btn.onclick = () => {
+             btn.textContent = "Installing...";
+             btn.disabled = true;
+             // Install Request
+             vscode.postMessage({ command: "installFromCli", repo: item.repo });
+          };
+
+          div.appendChild(btn);
+          cliSearchResults.appendChild(div);
+      });
+  }
+  
+  // --- Paste Command Logic ---
+  const pasteCmdBtn = document.getElementById("paste-command-btn");
+  const pasteCmdInput = document.getElementById("paste-command-input");
+  
+  if (pasteCmdBtn && pasteCmdInput) {
+      pasteCmdBtn.addEventListener("click", () => {
+          // @ts-ignore
+          const raw = pasteCmdInput.value.trim();
+          if (!raw) return;
+          
+          // Parse: npx skills add <repo>
+          // Or: bunx skills add ...
+          // Or just: <repo>
+          
+          let repo = raw;
+          
+          // Regex to extract repo from standard command
+          // matches: skills add [whitespace] (owner/repo[@version])
+          const match = raw.match(/skills\s+add\s+([^\s]+)/);
+          if (match && match[1]) {
+              repo = match[1];
+          }
+          
+          // If user just pasted "owner/repo", that's fine too.
+          
+          vscode.postMessage({ command: "installFromCli", repo: repo });
+      });
+  }
+
+  // --- External Browse Logic ---
+  const browseBtn = document.getElementById("browse-skillsmp-btn");
+  if (browseBtn) {
+      browseBtn.addEventListener("click", () => {
+          vscode.postMessage({ command: "openExternal", url: "https://skillsmp.com" });
+      });
   }
 
   function renderDavilaCategories() {
@@ -669,32 +841,50 @@
     });
   }
 
+
+
   /**
    * @param {any[]} workflows
    */
   function updateWorkflowList(workflows) {
-    // Debug: Log what we received
-    // vscode.postMessage({
-    //     command: 'debug',
-    //     message: `[Frontend] updateWorkflowList received: ${JSON.stringify(workflows)}`
-    // });
-
     if (!workflowList) return;
-    workflowList.innerHTML = "";
+    
+    // Save state
+    currentWorkflows = Array.isArray(workflows) ? workflows : [];
+    currentPage = 1; // Reset to first page on new data
 
-    // Check array validity
-    if (!Array.isArray(workflows)) {
-      vscode.postMessage({
-        command: "debug",
-        message: "[Frontend] Error: workflows is not an array",
-      });
-      workflowList.innerHTML =
-        '<li class="empty-state">Error: Invalid data received.</li>';
-      return;
-    }
+    renderWorkflowsPage();
+  }
 
-    // Render Table Header
-    if (workflows && workflows.length > 0) {
+  function renderWorkflowsPage() {
+      if (!workflowList) return;
+      workflowList.innerHTML = "";
+
+      // Debug: Log what we received
+      // vscode.postMessage({
+      //     command: 'debug',
+      //     message: `[Frontend] updateWorkflowList received: ${JSON.stringify(workflows)}`
+      // });
+
+      // Check array validity
+      if (!Array.isArray(currentWorkflows)) {
+        vscode.postMessage({
+          command: "debug",
+          message: "[Frontend] Error: currentWorkflows is not an array",
+        });
+        workflowList.innerHTML =
+          '<li class="empty-state">Error: Invalid data received.</li>';
+        renderPagination();
+        return;
+      }
+
+      if (currentWorkflows.length === 0) {
+           workflowList.innerHTML = '<li class="empty-state">No active workflows.</li>';
+           renderPagination();
+           return;
+      }
+
+      // Render Table Header
       const header = document.createElement("li");
       header.className = "workflow-header";
 
@@ -721,79 +911,125 @@
       header.appendChild(colActionHeader);
 
       workflowList.appendChild(header);
-    } else {
-      workflowList.innerHTML =
-        '<li class="empty-state">No active workflows.</li>';
-      return;
-    }
 
-    workflows.forEach(
-      (
-        /** @type {{ name: string; filename: string; description: string; enabled: boolean }} */ wf
-      ) => {
-        const li = document.createElement("li");
-        li.className = "workflow-row";
-        if (!wf.enabled) {
-          li.classList.add("disabled");
+      // Slice for Pagination
+      const totalItems = currentWorkflows.length;
+      // If we have items but ITEMS_PER_PAGE is somehow invalid, default safety
+      const idxStart = (currentPage - 1) * ITEMS_PER_PAGE;
+      const idxEnd = idxStart + ITEMS_PER_PAGE;
+      const pageItems = currentWorkflows.slice(idxStart, idxEnd);
+
+      pageItems.forEach(
+        (
+          /** @type {{ name: string; filename: string; description: string; enabled: boolean }} */ wf
+        ) => {
+          const li = document.createElement("li");
+          li.className = "workflow-row";
+          if (!wf.enabled) {
+            li.classList.add("disabled");
+          }
+
+          // Name Column
+          const colName = document.createElement("div");
+          colName.className = "col-name";
+          colName.textContent = wf.name; // Already stripped by backend
+          colName.title = wf.filename;
+
+          // Description Column
+          const colDesc = document.createElement("div");
+          colDesc.className = "col-desc";
+          colDesc.textContent = wf.description || "-";
+          colDesc.title = wf.description;
+
+          // Action Column
+          const colAction = document.createElement("div");
+          colAction.className = "col-action";
+
+          // Toggle Button
+          const toggleBtn = document.createElement("button");
+          toggleBtn.className = "action-btn toggle-btn";
+          toggleBtn.innerHTML = wf.enabled ? "⏻" : "○"; // Power icon or circle
+          toggleBtn.title = wf.enabled ? "Disable" : "Enable";
+          toggleBtn.onclick = () => {
+            vscode.postMessage({ command: "toggle", filename: wf.filename });
+          };
+
+          const editBtn = document.createElement("button");
+          editBtn.className = "action-btn edit-btn";
+          editBtn.innerHTML = "✎";
+          editBtn.title = "Edit Workflow";
+          // Only allow editing if enabled, or allow both? User didn't specify.
+          // Enabling edit for disabled files works if VS Code can open .disable files as text.
+          // Usually safest to allow.
+          editBtn.onclick = () => {
+            vscode.postMessage({ command: "openFile", filename: wf.filename });
+          };
+
+          const delBtn = document.createElement("button");
+          delBtn.className = "action-btn delete-btn";
+          delBtn.innerHTML = "✕";
+          delBtn.title = "Delete Workflow";
+          delBtn.onclick = () => {
+            // Note: confirm() may not work in Webview, so we skip it
+            // Backend should handle confirmation if needed
+            vscode.postMessage({ command: "delete", filename: wf.filename });
+          };
+
+          colAction.appendChild(toggleBtn);
+          colAction.appendChild(editBtn);
+          colAction.appendChild(delBtn);
+
+          li.appendChild(colName);
+          li.appendChild(colDesc);
+          li.appendChild(colAction);
+
+          workflowList.appendChild(li);
         }
+      );
+      renderPagination();
+  }
 
-        // Name Column
-        const colName = document.createElement("div");
-        colName.className = "col-name";
-        colName.textContent = wf.name; // Already stripped by backend
-        colName.title = wf.filename;
+  function renderPagination() {
+      const controls = document.getElementById('pagination-controls');
+      if (!controls || !prevPageBtn || !nextPageBtn || !pageInfo) return;
+      
+      const totalItems = currentWorkflows.length;
+      const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
-        // Description Column
-        const colDesc = document.createElement("div");
-        colDesc.className = "col-desc";
-        colDesc.textContent = wf.description || "-";
-        colDesc.title = wf.description;
-
-        // Action Column
-        const colAction = document.createElement("div");
-        colAction.className = "col-action";
-
-        // Toggle Button
-        const toggleBtn = document.createElement("button");
-        toggleBtn.className = "action-btn toggle-btn";
-        toggleBtn.innerHTML = wf.enabled ? "⏻" : "○"; // Power icon or circle
-        toggleBtn.title = wf.enabled ? "Disable" : "Enable";
-        toggleBtn.onclick = () => {
-          vscode.postMessage({ command: "toggle", filename: wf.filename });
-        };
-
-        const editBtn = document.createElement("button");
-        editBtn.className = "action-btn edit-btn";
-        editBtn.innerHTML = "✎";
-        editBtn.title = "Edit Workflow";
-        // Only allow editing if enabled, or allow both? User didn't specify.
-        // Enabling edit for disabled files works if VS Code can open .disable files as text.
-        // Usually safest to allow.
-        editBtn.onclick = () => {
-          vscode.postMessage({ command: "openFile", filename: wf.filename });
-        };
-
-        const delBtn = document.createElement("button");
-        delBtn.className = "action-btn delete-btn";
-        delBtn.innerHTML = "✕";
-        delBtn.title = "Delete Workflow";
-        delBtn.onclick = () => {
-          // Note: confirm() may not work in Webview, so we skip it
-          // Backend should handle confirmation if needed
-          vscode.postMessage({ command: "delete", filename: wf.filename });
-        };
-
-        colAction.appendChild(toggleBtn);
-        colAction.appendChild(editBtn);
-        colAction.appendChild(delBtn);
-
-        li.appendChild(colName);
-        li.appendChild(colDesc);
-        li.appendChild(colAction);
-
-        workflowList.appendChild(li);
+      // Only show controls if we have more items than can fit on one page
+      // OR always show? User asked for pagination. 
+      // Usually hide if <= 1 page.
+      if (totalPages <= 1) {
+          controls.style.display = 'none';
+      } else {
+          controls.style.display = 'flex';
       }
-    );
+
+      pageInfo.textContent = `Page ${currentPage} of ${Math.max(1, totalPages)}`;
+      
+      // Fix types by casting or just setting disabled prop
+      /** @type {HTMLButtonElement} */(prevPageBtn).disabled = currentPage <= 1;
+      /** @type {HTMLButtonElement} */(nextPageBtn).disabled = currentPage >= totalPages;
+  }
+
+  // --- Pagination Listeners ---
+  if (prevPageBtn) {
+      prevPageBtn.addEventListener("click", () => {
+          if (currentPage > 1) {
+              currentPage--;
+              renderWorkflowsPage();
+          }
+      });
+  }
+
+  if (nextPageBtn) {
+      nextPageBtn.addEventListener("click", () => {
+          const totalPages = Math.ceil(currentWorkflows.length / ITEMS_PER_PAGE);
+          if (currentPage < totalPages) {
+              currentPage++;
+              renderWorkflowsPage();
+          }
+      });
   }
 
   /**
