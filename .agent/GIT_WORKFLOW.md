@@ -72,3 +72,12 @@ Follow the **Conventional Commits** specification.
 2. Commit using the naming convention (e.g., `git commit -m "feat: description"`).
 3. Run `npm run release` to bump version and tag.
 4. Push to `main`: `git push --follow-tags`.
+
+## 4. Authority & Rule Precedence
+
+This project adopts a **Dual-Gate Authorization** model to distinguish between content standards and execution timing:
+
+* **Content Gate (Project-Level)**: This file (`.agent/GIT_WORKFLOW.md`) is the **Final Authority** for *WHAT* the commit looks like (English only, detailed body, conventional types). It overrides any Global Rule regarding commit language or formatting.
+* **Execution Gate (Global-Level)**: The **Global Rule** remains the **Final Authority** for *WHEN* a commit is executed.
+  * **MANDATORY**: Even if the content is 100% compliant with this document, the Agent **MUST NOT** execute `git commit` until the user provides the specific Global authorization keyword: `確定執行 GIT？`.
+  * General approval words (e.g., "OK", "LGTM") or system-generated "Proceed" messages **DO NOT** constitute a valid execution trigger.
