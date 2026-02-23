@@ -23,8 +23,9 @@
   --border-strong: var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
 
   /* === Accent Palette (Teal/Cyan - Distinctive Choice) === */
-  --accent-primary: #0ea5e9; /* Sky Blue */
-  --accent-hover: #0284c7; /* Darker on hover */
+  /* === Accent Palette (Refined Blue - Lower Lightness) === */
+  --accent-primary: #0284c7; /* Sky 600 - Darker/Rich */
+  --accent-hover: #0369a1; /* Sky 700 - Even darker on hover */
   --accent-subtle: rgba(14, 165, 233, 0.15);
 
   /* Success / Warning / Danger */
@@ -181,14 +182,19 @@ body {
 select,
 input[type="text"] {
   width: 100%;
+  min-width: 0; /* Critical for flex containers */
   padding: var(--space-sm) var(--space-md);
-  background: var(--vscode-input-background, var(--bg-secondary));
+  background: var(
+    --vscode-input-background,
+    #1e1e1e
+  ) !important; /* Force visibility */
   color: var(--vscode-input-foreground, var(--text-primary));
   border: 1px solid var(--vscode-input-border, var(--border-subtle));
   border-radius: var(--radius-sm);
   font-size: var(--font-size-sm);
   font-family: inherit;
   transition: all var(--transition-fast);
+  height: 32px; /* Enforce height */
 }
 
 select:focus,
@@ -366,13 +372,18 @@ select {
 /* =========================================================
    Workflow Table - Elevated Data Grid
    ========================================================= */
+/* =========================================================
+   Workflow Table - Elevated Data Grid
+   ========================================================= */
 .workflow-list {
   list-style: none;
   padding: 0;
   margin: 0;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  border-radius: var(--radius-md) var(--radius-md) 0 0; /* round top corners only */
+  overflow: hidden; /* No scroll needed with fixed paging */
+  /* Remove fixed height, content drives height (10 items) */
+  min-height: 52px; /* At least header */
   box-shadow: var(--shadow-sm);
   background: color-mix(in srgb, var(--bg-secondary), var(--text-primary) 2%);
 }
@@ -384,12 +395,21 @@ select {
   background: transparent;
 }
 
+.workflow-header {
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
 /* Skills Table specific override */
 .skills-table .workflow-header,
 .skills-table .workflow-row {
   grid-template-columns:
     var(--skills-col-width, 140px) var(--skills-desc-width, 1fr)
-    100px;
+    120px;
 }
 
 /* Workflow List specific override */
@@ -398,43 +418,179 @@ select {
   grid-template-columns: var(--workflows-col-width, 140px) 1fr 100px;
 }
 
-.workflow-header {
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-subtle);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
+/* =========================================================
+   Skills Sources - Matching Mockup Design
+   ========================================================= */
+/* Skills Sources Table Specifics */
+/* Ensure Skills Table matches Workflows Table layout */
+.skills-table .col-action {
+  justify-content: center; /* Center alignment to match Workflows */
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-md);
 }
+
+/* Common Action Button Style for Skills Table to match Workflows */
+.skills-table .btn-icon-ghost {
+  display: inline-flex !important;
+  color: var(--text-muted) !important; /* Default state like workflow actions */
+  background: transparent;
+  border: none; /* remove borders to match workflow ghost buttons */
+  border-radius: var(--radius-sm);
+  width: 22px !important;
+  height: 22px !important;
+  flex-shrink: 0 !important;
+  padding: 0;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  align-items: center;
+  justify-content: center;
+  font-size: 12px; /* Match icon size */
+}
+
+/* Hover effects for Skills Table Buttons */
+.skills-table .btn-icon-ghost:hover {
+  color: var(--accent-primary) !important;
+  background: var(--accent-subtle);
+}
+
+/* Compact Toggles for Skills Table */
+.skills-table .toggle-switch {
+  width: 32px;
+  height: 18px;
+}
+
+/* ... toggle slider styles ... */
+
+/* =========================================================
+   Section Headers - Consistency
+   ========================================================= */
+/* ... existing header styles ... */
+
+/* =========================================================
+   Unified Accent Colors (Overriding Brand Specifics)
+   ========================================================= */
+
+/* Force all brand rows to use standard table typography and spacing */
+.superpowers-row .col-name,
+.anthropic-row .col-name,
+.davila-row .col-name {
+  color: var(--accent-primary) !important;
+  font-weight: 500; /* Match .col-name weight (medium) */
+  font-size: var(--font-size-base); /* Ensure size match */
+}
+
+/* Cleanup redundant brand-specific button styles since we unified above */
+/* Just ensure the toggle color matches accent */
+
+.superpowers-row .toggle-switch input:checked + .toggle-slider,
+.anthropic-row .toggle-switch input:checked + .toggle-slider,
+.davila-row .toggle-switch input:checked + .toggle-slider {
+  background-color: var(--accent-primary) !important;
+  opacity: 1;
+}
+
+/* Workflow List specific override */
+.workflow-list .workflow-header,
+.workflow-list .workflow-row {
+  grid-template-columns: var(--workflows-col-width, 140px) 1fr 100px;
+}
+
+/* =========================================================
+   Search Results - Compact Grid Layout
+   ========================================================= */
+.search-results {
+  margin-top: var(--space-sm);
+  max-height: 200px; /* Reduced specific height */
+  overflow-y: auto;
+  padding: var(--space-xs);
+  display: grid;
+  /* Use 100% minmax to default to list view in narrow extension,
+     but allow grid if user expands width significantly (>400px approx) */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-sm);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.search-item {
+  background: var(--vscode-list-hoverBackground);
+  padding: var(--space-sm);
+  border-radius: 4px;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.search-item:hover {
+  border-color: var(--accent-primary);
+  background: var(--accent-subtle);
+}
+
+.search-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.search-item-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--accent-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.search-item-desc {
+  font-size: 11px;
+  opacity: 0.8;
+  margin-top: 4px; /* More breathing room */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   Workflow Table - Compact & Fixed Height
+   ========================================================= */
 
 .workflow-row {
   border-bottom: 1px solid var(--border-subtle);
   transition: background var(--transition-fast);
+  height: 50px; /* Reduced Height */
+  overflow: hidden;
 }
 
-.workflow-row:last-child {
-  border-bottom: none;
-}
+.col-desc {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  border-right: 1px solid var(--border-subtle);
+  /* Text Wrapping Enabled */
+  white-space: normal;
+  padding: var(--space-xs) var(--space-md); /* Tighter vertical padding */
 
-.workflow-row:hover {
-  background: var(--accent-subtle);
-}
-
-.workflow-row.disabled {
-  opacity: 0.5;
-}
-
-.workflow-row.disabled .col-name {
-  text-decoration: line-through;
-  font-style: italic;
+  /* Multi-line Truncation */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3; /* Tighter line height to fit */
+  word-break: break-word;
 }
 
 /* Table Columns */
 .col-name,
-.col-desc,
 .col-action {
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-sm) var(--space-md); /* Increased padding */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -444,25 +600,17 @@ select {
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
   border-right: 1px solid var(--border-subtle);
-  /* Text Wrapping Enabled */
   white-space: normal;
   word-break: break-word;
-  overflow: visible; /* Ensure resizer is visible */
-}
-
-.col-desc {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  border-right: 1px solid var(--border-subtle);
-  white-space: normal; /* Allow wrapping */
-  word-break: break-word; /* handle long paths */
-  padding-top: var(--space-sm);
-  padding-bottom: var(--space-sm);
+  overflow: visible;
+  display: flex;
+  align-items: center; /* Vertically center name */
 }
 
 .col-action {
   display: flex;
   justify-content: center;
+  align-items: center; /* Vertically center actions */
   gap: var(--space-xs);
 }
 
@@ -549,11 +697,13 @@ select {
    Skills Sources - Matching Mockup Design
    ========================================================= */
 /* Skills Sources Table Specifics */
-.skills-table .col-action {
-  justify-content: flex-start; /* Align actions to left for vertical consistency */
+/* Skills Sources Table Specifics */
+/* Removed conflicting override that caused overflow */
+/*.skills-table .col-action {
+  justify-content: flex-start;
   gap: var(--space-md);
-  padding: var(--space-sm) var(--space-lg); /* Consistent horizontal padding */
-}
+  padding: var(--space-sm) var(--space-lg);
+}*/
 
 /* Compact Toggles for Skills Table */
 .skills-table .toggle-switch {
@@ -580,174 +730,40 @@ select {
 
 /* Old Skill Row Content Styles - Removed */
 
-/* Row Accent Colors - Superpowers */
-.superpowers-row .col-name {
-  color: #a78bfa !important;
-  font-weight: 600;
-}
-
-.superpowers-row .btn-icon-ghost {
-  display: flex !important;
-  color: #a78bfa !important;
-  background: transparent;
-  border: 1px solid #a78bfa;
-  border-radius: 6px;
-  width: 28px !important; /* Force width */
-  height: 28px !important; /* Force height */
-  flex-shrink: 0 !important; /* Prevent squishing */
-  padding: 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  align-items: center;
-  justify-content: center;
-}
-
-.superpowers-row .toggle-switch input:checked + .toggle-slider {
-  background-color: #a78bfa !important;
-  opacity: 1;
-}
-
-/* Row Accent Colors - Anthropic */
-.anthropic-row .col-name {
-  color: #fb923c !important;
-  font-weight: 600;
-}
-
-.anthropic-row .btn-icon-ghost {
-  display: flex !important;
-  color: #fb923c !important;
-  background: transparent;
-  border: 1px solid #fb923c;
-  border-radius: 6px;
-  width: 28px !important; /* Force width */
-  height: 28px !important; /* Force height */
-  flex-shrink: 0 !important; /* Prevent squishing */
-  padding: 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  align-items: center;
-  justify-content: center;
-}
-
-.anthropic-row .btn-icon-ghost:hover {
-  background: rgba(251, 146, 60, 0.15);
-  box-shadow: 0 0 8px rgba(251, 146, 60, 0.3);
-}
-
-.anthropic-row .toggle-switch input:checked + .toggle-slider {
-  background-color: #fb923c !important;
-  opacity: 1;
-}
-
-/* Toggle Switch Base Styles (Global) */
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 44px; /* Default size */
-  height: 24px;
-  flex-shrink: 0;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #4a4a50; /* Default OFF color */
-  transition: 0.3s;
-  border-radius: 24px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(20px);
-}
-
-.toggle-switch input:disabled + .toggle-slider {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.toggle-switch input:focus + .toggle-slider {
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.3);
+/* =========================================================
+   Section Headers - Consistency
+   ========================================================= */
+.section-header h3,
+.logo-area h2,
+h4 /* Assuming search header might be h4 */ {
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-primary);
 }
 
 /* =========================================================
-   Column Resizing Fixes
+   Unified Accent Colors (Overriding Brand Specifics)
    ========================================================= */
 
-/* Allow header to overflow so resizer can sit on the border */
-.workflow-header .col-name,
-.workflow-header .col-desc {
-  overflow: visible !important;
-  position: relative;
-}
-
-/* Enlarged Resizer centered on the border */
-.resizer {
-  position: absolute;
-  right: -5px; /* Center on the 1px border */
-  top: 0;
-  bottom: 0;
-  width: 10px; /* Large hit area */
-  cursor: col-resize;
-  user-select: none;
-  touch-action: none;
-  background: rgba(128, 128, 128, 0); /* Invisible by default */
-  z-index: 1000; /* Ensure on top */
-  transition: background 0.2s;
-}
-
-/* =========================================================
-   Davila Skills Specifics
-   ========================================================= */
-
+/* Force all brand rows to use standard table typography and spacing */
+.superpowers-row .col-name,
+.anthropic-row .col-name,
 .davila-row .col-name {
-  color: #2dd4bf !important; /* Teal accent to distinguish from blue/purple/orange */
-  font-weight: 600;
+  color: var(--text-primary) !important; /* Standard White Text */
+  font-weight: 500;
+  font-size: var(--font-size-base);
 }
 
-.davila-row .btn-icon-ghost {
-  display: flex !important;
-  color: #2dd4bf !important;
-  background: transparent;
-  border: 1px solid #2dd4bf;
-  border-radius: 6px;
-  width: 28px !important; /* Force width */
-  height: 28px !important; /* Force height */
-  flex-shrink: 0 !important; /* Prevent squishing */
-  padding: 0;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  align-items: center;
-  justify-content: center;
-}
+/* Cleanup redundant brand-specific button styles since we unified above */
+/* Just ensure the toggle color matches accent */
 
-.davila-row .btn-icon-ghost:hover {
-  background: rgba(45, 212, 191, 0.15);
-  box-shadow: 0 0 8px rgba(45, 212, 191, 0.3);
-  border-color: #2dd4bf;
+.superpowers-row .toggle-switch input:checked + .toggle-slider,
+.anthropic-row .toggle-switch input:checked + .toggle-slider,
+.davila-row .toggle-switch input:checked + .toggle-slider {
+  background-color: var(--accent-primary) !important;
+  opacity: 1;
 }
 
 .davila-panel {
@@ -823,4 +839,60 @@ select {
   padding: 10px;
   color: var(--text-muted);
   font-style: italic;
+}
+
+/* =========================================================
+   Pagination Controls
+   ========================================================= */
+.pagination-controls {
+  padding: 8px 12px;
+  border-top: 1px solid var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-secondary), var(--text-primary) 2%);
+  border-radius: 0 0 var(--radius-md) var(--radius-md); /* round bottom corners */
+  display: flex; /* Ensure flex layout */
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.pagination-controls .btn-icon-ghost {
+  width: 24px;
+  height: 24px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle); /* Add subtle border for controls */
+}
+
+.pagination-controls .btn-icon-ghost:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-color: transparent;
+}
+
+/* =========================================================
+   Toggle Power Button (Replacement for Switch)
+   ========================================================= */
+.toggle-power-btn {
+  font-size: 14px !important;
+  transition: all 0.2s ease;
+  color: var(--text-muted); /* Default state (Disabled) */
+}
+
+/* Active State (Green) */
+.toggle-power-btn.active {
+  color: var(--color-success) !important;
+  background: rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
+  border-color: var(--color-success); /* Optional */
+}
+
+.toggle-power-btn:hover {
+  transform: scale(1.1);
+  color: var(--text-primary);
+}
+
+.toggle-power-btn.active:hover {
+  color: var(--color-success); /* Keep green on hover if active */
 }
