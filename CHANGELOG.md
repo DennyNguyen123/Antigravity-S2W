@@ -4,6 +4,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.4.1] - 2026-03-03
+
+### Added
+
+- **Skills MP Proxy Server**: Built-in local proxy server to resolve CORS issues when downloading packages directly from the Skills Marketplace.
+- **Frontend Pagination**: Implemented pagination controls in the Webview to efficiently browse and manage large numbers of workflows.
+- **UI/UX Pro Max Skill**: Added one-click install support and a dedicated visual toggle for the UI/UX Pro Max design intelligence skill.
+
 ## [0.3.0] - 2026-01-15
 
 ### Added

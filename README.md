@@ -3,7 +3,7 @@
 [繁體中文](README.zh-TW.md)
 
 > [!NOTE]
-> **Updated on 2026-01-15**
+> **Updated on 2026-03-03 (v0.4.1)**
 >
 > - **Gemini CLI** now officially supports Agent Skills! See [v0.24.0 Release](https://github.com/google-gemini/gemini-cli/releases/tag/v0.24.0) for details.
 
@@ -27,7 +27,7 @@ Transform your installed AI Skills into Antigravity Global Workflow files. Colle
 
 - **ZIP import**: Extract skill packages from one or more ZIP files
 - **GitHub download**: Install skills directly from a GitHub folder URL
-- Supports [Skills Marketplace](https://skillsmp.com) packages
+- Supports [Skills Marketplace](https://skillsmp.com) packages with a built-in proxy server to resolve CORS issues.
 
 ### 3. OneKey Install Skills
 
@@ -36,13 +36,14 @@ A simplified alternative that fetches skills directly from official GitHub repos
 - **Superpowers**: One-click install [obra/superpowers](https://github.com/obra/superpowers) skills.
 - **Anthropic Skills**: One-click install [anthropics/skills](https://github.com/anthropics/skills) skills.
 - **Community Skills (Davila7)**: One-click install community skills from [davila7](https://github.com/davila7/claude-code-templates), supports categorized selection.
+- **UI/UX Pro Max**: One-click install [UI/UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) with a dedicated feature toggle.
 - **Sync & Apply**: Use the "Apply Changes" button to sync all selected categories at once.
 - **Manual Update**: Click the ↻ icon next to an item to manually fetch the latest version from GitHub.
 - **File Structure**: Skills are installed to `~/.gemini/antigravity/skills/` without prefixes, maintaining original directory names.
 
 ### 4. Workflow Manager
 
-- Browse all generated workflows in one place
+- Browse all generated workflows in one place with built-in pagination controls
 - Enable/disable workflows by renaming `.md` ⇄ `.md.disable`
 - Open and edit workflow files directly
 - Delete workflows and their corresponding source skill folders

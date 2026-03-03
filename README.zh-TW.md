@@ -3,7 +3,7 @@
 [English](README.md)
 
 > [!NOTE]
-> **更新於 2026-01-14**
+> **更新於 2026-03-03 (v0.4.1)**
 >
 > - **Gemini CLI** 已正式支援 Agent Skills！詳見 [v0.24.0 Release](https://github.com/google-gemini/gemini-cli/releases/tag/v0.24.0)。
 
@@ -30,7 +30,7 @@
 
 - **ZIP 匯入**：從一個或多個 ZIP 檔案解壓縮技能套件
 - **GitHub 下載**：直接從 GitHub 資料夾 URL 下載安裝
-- 支援 [Skills Marketplace](https://skillsmp.com) 技能包
+- 支援 [Skills Marketplace](https://skillsmp.com) 技能包（透過內建的本地端代理伺服器解決 CORS 與無法下載的問題）
 
 ### 3. 一鍵匯入技能 (OneKey Install)
 
@@ -39,13 +39,14 @@
 - **Superpowers**：一鍵安裝 [obra/superpowers](https://github.com/obra/superpowers) 技能
 - **Anthropic Skills**：一鍵安裝 [anthropics/skills](https://github.com/anthropics/skills) 技能
 - **Community Skills (Davila7)**：一鍵安裝 [davila7](https://github.com/davila7/claude-code-templates) 社群技能，支援複選多種主題分類。
+- **UI/UX Pro Max**：帶有專屬啟動開關的 [UI/UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) 一鍵安裝支援。
 - **同步更新 (Sync & Apply)**：透過「Apply Changes」按鈕一次更新所有選取的分類及項目。
 - **手動更新 (Manual Update)**：點擊項目右側的 ↻ 圖示手動抓取 GitHub 最新版本。
 - **檔案目錄**：技能安裝至 `~/.gemini/antigravity/skills/`，維持原始目錄結構。
 
 ### 4. 工作流程管理器
 
-- 在同一介面瀏覽所有已生成的工作流程
+- 在同一介面瀏覽所有已生成的工作流程（支援分頁控制器）
 - 啟用/停用工作流程（`.md` ⇄ `.md.disable`）
 - 直接開啟並編輯工作流程檔案
 - 刪除工作流程及其對應的來源技能資料夾
