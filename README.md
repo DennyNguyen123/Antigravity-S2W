@@ -3,9 +3,9 @@
 [繁體中文](README.zh-TW.md)
 
 > [!NOTE]
-> **Updated on 2026-03-03 (v0.4.1)**
+> **Updated on 2026-03-11 (v0.5.0)**
 >
-> - **Gemini CLI** now officially supports Agent Skills! See [v0.24.0 Release](https://github.com/google-gemini/gemini-cli/releases/tag/v0.24.0) for details.
+> - **Target IDE Selection**: Support for GitHub Copilot, Cursor, Windsurf, OpenCode, Kilo, and Vendor Agnostic formats!
 
 ![Antigravity-S2W Screenshot](resources/screenshot.jpg)
 
@@ -22,6 +22,8 @@ Transform your installed AI Skills into Antigravity Global Workflow files. Colle
 - Scan skill directories from Gemini
 - Read metadata from `SKILL.md` (name + `description` frontmatter)
 - Generate standardized Global Workflow `.md` files
+- **Multi-IDE Support**: Export workflows to formats compatible with GitHub Copilot (`.instructions.md`), Vendor Agnostic (`.agent.md`), and more.
+- **Local/Global Installation**: Export skills globally (Home directory) or locally (Workspace limits).
 
 ### 2. Skill Importer
 

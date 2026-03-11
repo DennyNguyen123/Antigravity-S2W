@@ -26,6 +26,28 @@
       <!-- Generator Section -->
       <section class="card generator-card">
         <h3>Workflow Generator</h3>
+        <p class="hint-text" style="margin-top: 0; margin-bottom: 10px">
+          Select your target IDE and where to install workflows.
+        </p>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px">
+          <div class="form-group" style="flex: 1; margin-bottom: 0">
+            <label for="target-agent">Target Environment</label>
+            <select id="target-agent">
+              <option value="gemini">Antigravity (.gemini)</option>
+              <option value="github">GitHub Copilot (.github)</option>
+              <option value="agents">Vendor Agnostic (.agents)</option>
+              <option value="opencode">Open Code (.opencode)</option>
+              <option value="kilo">Kilo (.kilo)</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex: 1; margin-bottom: 0">
+            <label for="install-mode">Installation Level</label>
+            <select id="install-mode">
+              <option value="global">Global (Home Dir)</option>
+              <option value="local">Local (Workspace)</option>
+            </select>
+          </div>
+        </div>
         <div class="form-group">
           <label for="skill-source">Select Skill Source</label>
           <select id="skill-source">
@@ -41,32 +63,53 @@
       <!-- Smart Search Section -->
       <section class="card search-card">
         <h3>Search Skills (CLI)</h3>
-        <p class="hint-text" style="margin-top:0; margin-bottom:10px;">Search and install skills directly from the terminal registry.</p>
-        <div class="search-box" style="display: flex; gap: 8px;">
-            <input type="text" id="cli-search-input" placeholder="e.g. react, python, debug" style="flex: 1; min-width: 0;" />
-            <button id="cli-search-btn" class="btn btn-primary" style="width: auto; white-space: nowrap;">Search</button>
+        <p class="hint-text" style="margin-top: 0; margin-bottom: 10px">
+          Search and install skills directly from the terminal registry.
+        </p>
+        <div class="search-box" style="display: flex; gap: 8px">
+          <input
+            type="text"
+            id="cli-search-input"
+            placeholder="e.g. react, python, debug"
+            style="flex: 1; min-width: 0"
+          />
+          <button
+            id="cli-search-btn"
+            class="btn btn-primary"
+            style="width: auto; white-space: nowrap"
+          >
+            Search
+          </button>
         </div>
-        <div id="cli-search-results" class="search-results hidden" style="margin-top: 10px; max-height: 300px; overflow-y: auto;"></div>
+        <div
+          id="cli-search-results"
+          class="search-results hidden"
+          style="margin-top: 10px; max-height: 300px; overflow-y: auto"
+        ></div>
       </section>
 
       <!-- Installer Section -->
       <section class="card installer-card">
         <h3>Manual Install</h3>
-        
-        <div style="display:flex; gap:8px;">
-            <button id="install-btn" class="btn btn-primary" style="flex:1;">
+
+        <div style="display: flex; gap: 8px">
+          <button id="install-btn" class="btn btn-primary" style="flex: 1">
             <span class="icon">📦</span> Select ZIP...
-            </button>
-            <button id="download-url-btn" class="btn btn-secondary" style="flex:1;">
+          </button>
+          <button
+            id="download-url-btn"
+            class="btn btn-secondary"
+            style="flex: 1"
+          >
             <span class="icon">🌐</span> Github URL...
-            </button>
+          </button>
         </div>
 
         <!-- URL Input Container -->
         <div
           id="url-input-container"
           class="url-input-group hidden"
-          style="display: none; margin-top: 10px;"
+          style="display: none; margin-top: 10px"
         >
           <input
             type="text"
@@ -143,11 +186,11 @@
             <div class="col-desc">Massive collection of categorized skills</div>
             <div class="col-action">
               <button
-                id="davila-install-btn-power" 
-                class="btn-icon-ghost toggle-power-btn" 
+                id="davila-install-btn-power"
+                class="btn-icon-ghost toggle-power-btn"
                 title="Manage Community Skills"
               >
-                ⏻ 
+                ⏻
               </button>
               <button
                 id="davila-update-btn"
@@ -169,7 +212,9 @@
           <!-- UI/UX Pro Max Skills Row -->
           <li class="workflow-row uiux-row">
             <div class="col-name">UI/UX Pro Max</div>
-            <div class="col-desc">Professional Design Intelligence & Gallery</div>
+            <div class="col-desc">
+              Professional Design Intelligence & Gallery
+            </div>
             <div class="col-action">
               <button
                 id="uiux-toggle-btn"
@@ -243,12 +288,26 @@
           <!-- Items will be injected here via JS -->
           <li class="empty-state">No workflows found.</li>
         </ul>
-        
+
         <!-- Pagination Controls -->
-        <div class="pagination-controls" id="pagination-controls" style="display: none; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 8px;">
-            <button id="prev-page-btn" class="btn-icon-ghost" disabled>◀</button>
-            <span id="page-info" style="font-size: 11px; color: var(--text-secondary);">Page 1</span>
-            <button id="next-page-btn" class="btn-icon-ghost" disabled>▶</button>
+        <div
+          class="pagination-controls"
+          id="pagination-controls"
+          style="
+            display: none;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+          "
+        >
+          <button id="prev-page-btn" class="btn-icon-ghost" disabled>◀</button>
+          <span
+            id="page-info"
+            style="font-size: 11px; color: var(--text-secondary)"
+            >Page 1</span
+          >
+          <button id="next-page-btn" class="btn-icon-ghost" disabled>▶</button>
         </div>
       </section>
     </div>

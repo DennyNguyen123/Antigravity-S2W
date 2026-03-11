@@ -34,6 +34,14 @@
   const installBtn = /** @type {any} */ (
     document.getElementById("install-btn")
   );
+  /** @type {HTMLSelectElement | null} */
+  const targetAgentSelect = /** @type {any} */ (
+    document.getElementById("target-agent")
+  );
+  /** @type {HTMLSelectElement | null} */
+  const installModeSelect = /** @type {any} */ (
+    document.getElementById("install-mode")
+  );
   /** @type {HTMLButtonElement | null} */
   const downloadUrlBtn = /** @type {any} */ (
     document.getElementById("download-url-btn")
@@ -104,6 +112,33 @@
       case "init":
         locale = message.locale;
         sources = message.sources;
+
+        if (targetAgentSelect && message.settings) {
+            targetAgentSelect.value = message.settings.targetAgent;
+        }
+        if (installModeSelect && message.settings) {
+            installModeSelect.value = message.settings.installMode;
+            
+            if (!message.settings.hasWorkspace) {
+                Array.from(installModeSelect.options).forEach(opt => {
+                    if (opt.value === 'local') {
+                        opt.disabled = true;
+                        opt.text = "Local (No Workspace Open)";
+                    }
+                });
+                if (installModeSelect.value === 'local') {
+                    installModeSelect.value = 'global';
+                }
+            } else {
+                 Array.from(installModeSelect.options).forEach(opt => {
+                    if (opt.value === 'local') {
+                        opt.disabled = false;
+                        opt.text = "Local (Workspace)";
+                    }
+                });
+            }
+        }
+
         renderSourceOptions(sources);
         updateWorkflowList(message.workflows);
         break;
@@ -217,6 +252,19 @@
   vscode.postMessage({ command: "checkSuperpowers" });
   vscode.postMessage({ command: "checkAnthropic" });
   vscode.postMessage({ command: "checkUiUxProMax" });
+
+  // 1a. Settings Update Logic
+  if (targetAgentSelect && installModeSelect) {
+      const updateSettings = () => {
+          vscode.postMessage({
+              command: "updateSettings",
+              targetAgent: targetAgentSelect.value,
+              installMode: installModeSelect.value
+          });
+      };
+      targetAgentSelect.addEventListener("change", updateSettings);
+      installModeSelect.addEventListener("change", updateSettings);
+  }
 
   // 2. Generator Logic
   if (generateBtn && sourceSelect) {

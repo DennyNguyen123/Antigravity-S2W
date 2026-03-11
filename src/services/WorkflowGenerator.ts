@@ -12,7 +12,8 @@ export class WorkflowGenerator {
   public async generate(
     sourcePath: string,
     outputDir: string,
-    prefix?: string
+    prefix?: string,
+    targetAgent: string = 'gemini'
   ): Promise<{ success: number; failed: number }> {
     if (!fs.existsSync(sourcePath)) {
       throw new Error(`Source path does not exist: ${sourcePath}`);
@@ -44,10 +45,16 @@ export class WorkflowGenerator {
               prefix
             );
 
+            let extension = ".md";
+            if (targetAgent === 'github') extension = ".instructions.md";
+            else if (targetAgent === 'agents') extension = ".agent.md";
+
             let fileName = prefix ? `${prefix}_${skillName}` : skillName;
-            if (!fileName.toLowerCase().endsWith(".md")) {
-              fileName += ".md";
+            if (fileName.toLowerCase().endsWith(".md")) {
+              fileName = fileName.slice(0, -3);
             }
+            fileName += extension;
+
             const outputPath = path.join(outputDir, fileName);
             await fs.promises.writeFile(outputPath, workflowContent, "utf8");
             results.success++;

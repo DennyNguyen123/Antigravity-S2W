@@ -3,9 +3,9 @@
 [English](README.md)
 
 > [!NOTE]
-> **更新於 2026-03-03 (v0.4.1)**
+> **更新於 2026-03-11 (v0.5.0)**
 >
-> - **Gemini CLI** 已正式支援 Agent Skills！詳見 [v0.24.0 Release](https://github.com/google-gemini/gemini-cli/releases/tag/v0.24.0)。
+> - **跨 IDE 支援**: 現在支援輸出至 GitHub Copilot, Cursor, Windsurf, OpenCode, Kilo 等不同格式！
 
 ## 系統需求
 
@@ -25,6 +25,8 @@
 - 掃描 Gemini 的技能目錄
 - 從 `SKILL.md` 讀取中繼資料（名稱 + `description` frontmatter）
 - 生成標準化的 Global Workflow `.md` 檔案
+- **多功能 Target IDE 支援**: 將工作流程輸出為支援 GitHub Copilot (`.instructions.md`)、多平台通用 (`.agent.md`) 的檔案命名格式。
+- **全域 / 區域安裝模式**: 可自由切換要儲存至使用者家目錄還是當前專案工作區。
 
 ### 2. 技能匯入器
 
