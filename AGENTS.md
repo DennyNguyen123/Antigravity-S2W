@@ -194,6 +194,11 @@ src/
 - **No Conversion**: The "Layer 1" conversion logic (symlinks, `~/.antigravity/` intermediate folder) has been removed.
 - **Direct Download**: Skills are downloaded directly from GitHub to the target directory using Sparse Checkout.
 
+### IDE & Target Environment Support (v0.5.0+)
+
+- **Target IDE Selection**: Supports writing workflows in specific formats based on the requested Target Agent (`.gemini`, `.github`, `.agents`, etc.).
+- **Installation Modes**: Workflows can now be generated globally (`os.homedir()`) or locally relative to `vscode.workspace.workspaceFolders`.
+
 ### Skill Sources & Paths
 
 - **Standard Path**: `~/.gemini/antigravity/skills/`

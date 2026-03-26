@@ -26,7 +26,11 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
   private uiUxInstaller: UiUxProMaxInstaller;
 
   constructor(private readonly _extensionUri: vscode.Uri) {
-    this.pathManager = new PathManager();
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    const rootPath = workspaceFolders && workspaceFolders.length > 0 ? workspaceFolders[0].uri.fsPath : undefined;
+    const appName = vscode.env.appName;
+
+    this.pathManager = new PathManager(rootPath, appName);
     this.workflowGenerator = new WorkflowGenerator();
     this.superpowersInstaller = new SuperpowersInstaller();
     this.anthropicInstaller = new AnthropicSkillsInstaller();
@@ -51,6 +55,11 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.command) {
         case "getConfigs":
+          this.sendInitData();
+          break;
+        case "updateSettings":
+          // @ts-ignore
+          this.pathManager.setSettings(data.installMode, data.targetAgent);
           this.sendInitData();
           break;
         case "refresh":
@@ -270,7 +279,8 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
 
     // Generate workflows
     const workflowsDir = this.pathManager.getDestinationPath();
-    await this.workflowGenerator.generate(skillsDir, workflowsDir);
+    const settings = this.pathManager.getSettings();
+    await this.workflowGenerator.generate(skillsDir, workflowsDir, undefined, settings.targetAgent);
     this.sendWorkflowList();
     
     const message = installedSkills.length === 1 
@@ -338,11 +348,13 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
       if (this._view) {
         const sources = this.pathManager.getAvailableSources();
         const workflows = this.getExistingWorkflows();
+        const settings = this.pathManager.getSettings();
         this._view.webview.postMessage({
           command: "init",
           locale: vscode.env.language,
           sources: sources,
           workflows: workflows,
+          settings: settings,
         });
       }
     } catch (e: any) {
@@ -476,7 +488,8 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     }
 
     try {
-      const result = await this.workflowGenerator.generate(effectiveSource, destDir);
+      const settings = this.pathManager.getSettings();
+      const result = await this.workflowGenerator.generate(effectiveSource, destDir, undefined, settings.targetAgent);
       
       let msg = `Generated ${result.success} workflows (${result.failed} failed) to ${destDir}`;
       if (importedCount > 0) {
@@ -780,9 +793,12 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     const destDir = this.pathManager.getDestinationPath();
     
     // We generate from the internal skills directory to the global workflows directory
+    const settings = this.pathManager.getSettings();
     await this.workflowGenerator.generate(
       targetBaseDir,
-      destDir
+      destDir,
+      undefined,
+      settings.targetAgent
     );
 
     // Just refresh the view
@@ -1053,28 +1069,7 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  private _getWarningHtml(): string {
-    const appName = vscode.env.appName || 'Unknown';
-    if (appName.toLowerCase().includes('antigravity')) {
-      return '';
-    }
-    
-    return `
-    <div style="
-      background-color: #ffe6e6; 
-      color: #900; 
-      padding: 8px; 
-      text-align: left; 
-      font-size: 0.85em;
-      font-weight: 500; 
-      border-bottom: 2px solid #d00;
-      font-family: sans-serif;
-    ">
-      This extension is designed for <strong>Google Antigravity IDE</strong>.<br>
-      It may not function correctly here.<br>
-      We recommend uninstalling it.
-    </div>`;
-  }
+  // Removed _getWarningHtml as the extension now officially supports multiple IDEs
 
   private _getHtmlForWebview(webview: vscode.Webview) {
     // Load file contents
@@ -1107,10 +1102,6 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
 
 
     // Generate and Inject CSP
-
-
-
-    // Generate and Inject CSP
     const nonce = 'antigravity-' + Date.now(); // Simple nonce (or just use unsafe-inline which user context likely needs)
     // Note: For simplicity and compatibility with existing inline styles/scripts, we use unsafe-inline mostly.
     // Important: we must include webview.cspSource to allow loading resources from the extension/webview origin
@@ -1121,17 +1112,6 @@ export class SkillsViewProvider implements vscode.WebviewViewProvider {
     // Fallback if placeholder missing (legacy check)
     if (!htmlContent.includes(csp) && htmlContent.includes('<head>')) {
          htmlContent = htmlContent.replace('<head>', `<head>${csp}`);
-    }
-
-    // Inject Compatibility Warning
-    const warningHtml = this._getWarningHtml();
-    if (warningHtml) {
-      if (htmlContent.includes("<body>")) {
-          htmlContent = htmlContent.replace("<body>", `<body>${warningHtml}`);
-      } else {
-          // Fallback if body tag is missing or has attributes
-          htmlContent = warningHtml + htmlContent; 
-      }
     }
 
     return htmlContent;

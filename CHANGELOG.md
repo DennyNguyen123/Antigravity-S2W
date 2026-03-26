@@ -4,6 +4,14 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.5.0] - 2026-03-11
+
+### Added
+
+- **Target IDE Selection**: Support generating workflows for different AI agents and IDEs, including Antigravity (`.gemini`), GitHub Copilot (`.github`), Vendor Agnostic (`.agents`), OpenCode (`.opencode`), and Kilo (`.kilo`).
+- **Installation Mode Selection**: Added the ability to choose between `Global (Home Dir)` and `Local (Workspace)` installation paths for targeted workflow deployment.
+- **Auto-Detect Environment**: The UI now automatically selects the most appropriate Target IDE based on the host editor (e.g. Cursor, Windsurf) and automatically defaults to Local Workspace mode if standard configuration folders (like `.github` or `.agents`) are detected.
+
 ## [0.4.1] - 2026-03-03
 
 ### Added
