@@ -135,8 +135,8 @@ export class PathManager {
     switch (this.targetAgent) {
       case "gemini":
         return this.installMode === "global"
-          ? path.join(base, ".gemini", "antigravity", "global_workflows")
-          : path.join(base, ".gemini", "antigravity", "workflows");
+          ? path.join(base, ".gemini", "config", "global_workflows")
+          : path.join(base, ".gemini", "antigravity-ide", "workflows");
       case "github":
         return path.join(base, ".github");
       case "agents":
@@ -149,6 +149,11 @@ export class PathManager {
   }
 
   public getSkillsPath(): string {
+    if (this.targetAgent === "gemini") {
+      return this.installMode === "global"
+        ? path.join(this.getBasePath(), ".gemini", "antigravity-ide", "skills")
+        : path.join(this.getBasePath(), ".gemini", "skills");
+    }
     return path.join(this.getBasePath(), `.${this.targetAgent}`, "skills");
   }
 }

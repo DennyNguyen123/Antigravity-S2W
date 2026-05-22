@@ -20,8 +20,8 @@ export class AnthropicSkillsInstaller {
 
   constructor() {
     this.homeDir = os.homedir();
-    this.skillsDir = path.join(this.homeDir, ".gemini", "antigravity", "skills");
-    this.workflowsDir = path.join(this.homeDir, ".gemini", "antigravity", "global_workflows");
+    this.skillsDir = path.join(this.homeDir, ".gemini", "antigravity-ide", "skills");
+    this.workflowsDir = path.join(this.homeDir, ".gemini", "config", "global_workflows");
     this.tempDir = path.join(this.homeDir, ".antigravity", "anthropic-temp");
   }
 

@@ -51,10 +51,10 @@ Please read and internalize the skill documentation located at:
 
   constructor() {
     this.homeDir = os.homedir();
-    // Default location: .gemini/antigravity/skills
-    this.skillsDir = path.join(this.homeDir, ".gemini", "antigravity", "skills");
+    // Default location: .gemini/antigravity-ide/skills
+    this.skillsDir = path.join(this.homeDir, ".gemini", "antigravity-ide", "skills");
     this.destSkillDir = path.join(this.skillsDir, "ui-ux-pro-max");
-    this.workflowsDir = path.join(this.homeDir, ".gemini", "antigravity", "global_workflows");
+    this.workflowsDir = path.join(this.homeDir, ".gemini", "config", "global_workflows");
   }
 
   public isInstalled(): boolean {
